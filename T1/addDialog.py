@@ -186,7 +186,7 @@ class AddObjectDialog(QtWidgets.QDialog):
             wireframe = addWireframe.create(nome, pontos)
             self.__displayFile.addObject(wireframe)
         
-        self.__objectList.addItem(str(nome) + "(" + self.selected_object + ")")  
+        self.__objectList.addItem(str(nome) + " (" + self.selected_object + ")")  
             
         print(self.__displayFile.objects_list) 
         self.accept()
@@ -196,6 +196,7 @@ class AddObjectDialog(QtWidgets.QDialog):
         message = QMessageBox()
         message.setWindowTitle("Aviso")
         message.setText("Dê um nome ao objeto")
+        message.setIcon(QMessageBox.Warning)
         message.setStyleSheet("background-color: rgb(212,208,200); color: black;")
         message.setFixedSize(400, 200)
         message.exec()
@@ -205,6 +206,7 @@ class AddObjectDialog(QtWidgets.QDialog):
         message = QMessageBox()
         message.setWindowTitle("Aviso")
         message.setText("Esse nome já existe")
+        message.setIcon(QMessageBox.Warning)
         message.setStyleSheet("background-color: rgb(212,208,200); color: black;")
         message.setFixedSize(400, 200)
         message.exec()
@@ -213,6 +215,7 @@ class AddObjectDialog(QtWidgets.QDialog):
         """Exibe mensagem de aviso quando os pontos não foram preenchidos."""
         message = QMessageBox()
         message.setWindowTitle("Aviso")
+        message.setIcon(QMessageBox.Warning)
         message.setText("Por favor, preencha todas as coordenadas.")
         message.setStyleSheet("background-color: rgb(212,208,200); color: black;")
         message.setFixedSize(400, 200)

@@ -67,7 +67,7 @@ class Settings():
     # Geometria do frame de controle
     @staticmethod
     def control_frame():
-        return (10, 210, 280, 165)
+        return (15, 230, 190, 315)
     
     @staticmethod
     def backgroundColor():

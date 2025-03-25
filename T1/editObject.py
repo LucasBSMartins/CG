@@ -9,7 +9,7 @@ class EditObject(QtWidgets.QDialog):
     """Janela para editar as coordenadas do objeto escolhido."""
     def __init__(self, selected_object, displayFile, objectList):
         super().__init__()
-        self.setWindowTitle(f"Editar {selected_object}")
+        self.setWindowTitle(f"Editar {selected_object.name}")
         self.resize(300, 400)
         self.__displayFile = displayFile
         self.__objectList = objectList

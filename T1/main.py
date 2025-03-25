@@ -11,8 +11,8 @@ def run_app():
 if __name__ == "__main__":
     import hupper
     hupper.start_reloader("main.run_app")
-'''
 
+'''
 app = QApplication(sys.argv)
 window = MainWindow()
 window.show()
