@@ -3,6 +3,7 @@ from PySide6.QtGui import QColor, QPen
 from utils.setting import Type
 
 class Line(Object):
+    # Classe que representa o objeto gráfico de tipo linha
     def __init__(self, name, coord):
         super().__init__(name, Type.LINE, coord)
     

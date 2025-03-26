@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 
 class Object(ABC):
+    # Classe abstrata de objeto, que será estendida no código 
+    # para representação dos três tipos de objeto
     def __init__(self, name, tipo, coord):
         self.__name = name
         self.__tipo = tipo

@@ -4,6 +4,7 @@ from PySide6.QtCore import QPointF
 from utils.setting import Type
 
 class Wireframe(Object):
+    """Classe que representa um objeto gráfico do tipo Wireframe (polígono fechado)"""
     def __init__(self, name, coord):
         super().__init__(name, Type.WIREFRAME, coord)
 

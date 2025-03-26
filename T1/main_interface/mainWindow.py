@@ -18,7 +18,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__window = Window()
         self.__console = None
         
-        
+        # Define tamanho fixo da janela, nome e cor
         self.setFixedSize(800, 600)
         self.setWindowTitle("SGI")
         self.setStyleSheet(f"{Settings.backgroundColor()};")
@@ -34,6 +34,7 @@ class MainWindow(QtWidgets.QMainWindow):
         frame.setStyleSheet("QFrame { border: 2px solid black; }")
         return frame
 
+    # Método para criar e configurar um texto (QLabel) dentro de um frame
     def __buildText(self, text, parent, x, y, w, h):
         label = QtWidgets.QLabel(text, parent)
         label.setGeometry(x, y, w, h)
@@ -71,6 +72,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def  __painter(self):
         
         # ///////////////// Gerando delimitações de área //////////////////////
+
+        # Criando e posicionando os frames principais
         self.__menu_frame = self.__buildFrame(self, Settings.menu_frame()[0],
                                          Settings.menu_frame()[1],
                                          Settings.menu_frame()[2],
@@ -104,19 +107,22 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # ///////////////// Coisas que usamos //////////////////////
 
+        # Criando o console de saída
         self.__console = QtWidgets.QTextEdit(self.__console_frame)
         self.__console.setReadOnly(True)
         self.__console.setStyleSheet("color: black; background-color: white; border: 1px solid black;")
         self.__console.setGeometry(5, 5, 520, 80)
 
-        # Viewport
+        #Criando viewport
         self.__viewport = Viewport(self.__view_frame, self.__window)  
 
+        # Criando lista de objetos
         self.__object_list = QtWidgets.QListWidget(self.__objects_frame)
         self.__object_list.setGeometry(5, 10, 190, 150)
         self.__object_list.setStyleSheet("background-color: white; color: black; border: 1px solid black;")
-
         object_list = self.__object_list
+
+        # Criando sistema de logs
         log_message_func = self.__log_message
         self.__logs = Logs(log_message_func, object_list)
         
@@ -180,6 +186,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # ///////////////// ////////////////////// //////////////////////
 
+    # Método para atualizar a exibição da janela
     def __updateViewframe(self):
         self.__messages_label.setText(
                 f"A WINDOW ESTÁ EM X: {self.__window.xw_min:.2f} a {self.__window.xw_max:.2f}   "
@@ -187,10 +194,12 @@ class MainWindow(QtWidgets.QMainWindow):
             )   
         self.__viewport.drawViewportObj(self.__display_file.objects_list)
 
+    # Método para exibir mensagens no console
     def __log_message(self, message):
         self.__console.append(message)
         self.__updateViewframe()
 
+    # Método para adicionar um novo objeto
     def __add_object(self):
         add_dialog = ObjectSelectionDialog(self.__display_file, self.__object_list)
         add_dialog.exec()
@@ -198,6 +207,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__logs.logAddObject()
         self.__updateViewframe()
     
+    # Método para escolher uma operação sobre um objeto selecionado
     def __choose_operation(self):
 
         selected_index = self.__object_list.currentRow()
@@ -206,6 +216,7 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.__perform_selected_operation(selected_index)
 
+    # Método que executa a operação escolhida sobre um objeto
     def __perform_selected_operation(self, selected_index):
 
         object_name = self.__object_list.item(selected_index).text()
@@ -213,6 +224,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if operations.exec() == QtWidgets.QDialog.DialogCode.Accepted:
             self.__handle_operation(operations.clicked_button)
 
+    # Método que decide qual operação realizar
     def __handle_operation(self, clicked_button):
 
         if clicked_button == "delete":
@@ -220,6 +232,8 @@ class MainWindow(QtWidgets.QMainWindow):
         elif clicked_button == "edit":
             self.__editObject()
 
+
+    # Método para deletar um objeto selecionado
     def __deleteObject(self):
 
         index_selected_obj = self.__object_list.currentRow()      
@@ -229,6 +243,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__display_file.removeObject(index_selected_obj)
         self.__updateViewframe()
 
+    # Método para editar um objeto
     def __editObject(self):
         object_list = self.__object_list
         display_file = self.__display_file
