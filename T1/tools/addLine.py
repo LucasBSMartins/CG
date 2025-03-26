@@ -1,4 +1,4 @@
-from line import Line
+from objects.line import Line
 
 class AddLine():
     def __init__(self):

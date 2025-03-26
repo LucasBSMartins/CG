@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QLabel
 from PySide6.QtGui import QPixmap, QPainter
 from PySide6.QtCore import Qt
-from setting import Settings
+from utils.setting import Settings
 
 class Viewport(QLabel):
     def __init__(self, parent, window):

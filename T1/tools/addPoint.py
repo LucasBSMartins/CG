@@ -1,4 +1,4 @@
-from point import Point
+from objects.point import Point
 
 class AddPoint():
     def __init__(self):

@@ -1,4 +1,4 @@
-from setting import Settings
+from utils.setting import Settings
 
 class Window:
     def __init__(self):

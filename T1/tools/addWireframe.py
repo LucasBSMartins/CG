@@ -1,4 +1,4 @@
-from wireframe import Wireframe
+from objects.wireframe import Wireframe
 
 class AddWireframe():
     def __init__(self, n_coord):

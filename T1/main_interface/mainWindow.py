@@ -1,13 +1,15 @@
-from PySide6.QtWidgets import QMessageBox
-from editObject import EditObject
-from operations import Operations
-from addDialog import ObjectSelectionDialog
-from PySide6 import QtWidgets, QtGui
-from window import Window
-from viewport import Viewport
-from displayFile import DisplayFile
-from setting import Settings
-from moveToSecondMonitor import MoveMonitor
+from tools.windowControls import WindowControls
+from tools.objectEditor import ObjectEditor
+from screens.operations import Operations
+from screens.objectSelectionDialog import ObjectSelectionDialog
+from PySide6 import QtWidgets
+from utils.wnr import Wnr
+from utils.logs import Logs
+from main_interface.window import Window
+from main_interface.viewport import Viewport
+from main_interface.displayFile import DisplayFile
+from utils.setting import Settings
+from utils.moveToSecondMonitor import MoveMonitor
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -16,12 +18,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__window = Window()
         self.__console = None
         
+        
         self.setFixedSize(800, 600)
         self.setWindowTitle("SGI")
         self.setStyleSheet(f"{Settings.backgroundColor()};")
         
         self.__painter()
-        #Comentar se não tiver um segundo monitor, botei só pra me ajudar 
+
         #MoveMonitor.center_on_second_monitor(self)
 
     # Contrução de frames
@@ -113,6 +116,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__object_list.setGeometry(5, 10, 190, 150)
         self.__object_list.setStyleSheet("background-color: white; color: black; border: 1px solid black;")
 
+        object_list = self.__object_list
+        log_message_func = self.__log_message
+        self.__logs = Logs(log_message_func, object_list)
+        
+
         # ///////////////// ////////////////////// //////////////////////
 
         # ///////////////// Gerando labels //////////////////////
@@ -154,23 +162,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__scaleSpinBox.setValue(10.0)
         self.__scaleSpinBox.setStyleSheet("background-color: white")
 
+        window_controls = WindowControls(self.__window, self.__scaleSpinBox, self.__logs, self.__updateViewframe)
 
-        self.__zoom_in_button = self.__createControlFrameButton("ZOOM +", lambda: self.__zoomIn(), "Zoom in")
+        self.__zoom_in_button = self.__createControlFrameButton("ZOOM +", lambda: window_controls.zoom_in(), "Zoom in")
         self.__zoom_in_button.setGeometry(100, 15, 80, 25)
-        self.__zoom_out_button = self.__createControlFrameButton("ZOOM -", lambda: self.__zoomOut(), "Zoom out")
+        self.__zoom_out_button = self.__createControlFrameButton("ZOOM -", lambda: window_controls.zoom_out(), "Zoom out")
         self.__zoom_out_button.setGeometry(100, 45, 80, 25)
 
-        self.__up_button = self.__createControlFrameButton("↑", lambda: self.__moveUp(), "Mover window para cima")
+        self.__up_button = self.__createControlFrameButton("↑", lambda: window_controls.move_up(), "Mover window para cima")
         self.__up_button.setGeometry(75, 100, 40, 40)
-        self.__down_button = self.__createControlFrameButton("↓", lambda: self.__moveDown(), "Mover window para baixo" )
+        self.__down_button = self.__createControlFrameButton("↓", lambda: window_controls.move_down(), "Mover window para baixo" )
         self.__down_button.setGeometry(75, 145, 40, 40)
-        self.__left_button = self.__createControlFrameButton("←", lambda: self.__moveLeft(), "Mover window para esquerda")
+        self.__left_button = self.__createControlFrameButton("←", lambda: window_controls.move_left(), "Mover window para esquerda")
         self.__left_button.setGeometry(30, 145, 40, 40)
-        self.__right_button = self.__createControlFrameButton("→", lambda: self.__moveRight(), "Mover window para direita")
+        self.__right_button = self.__createControlFrameButton("→", lambda: window_controls.move_right(), "Mover window para direita")
         self.__right_button.setGeometry(120, 145, 40, 40)
 
         # ///////////////// ////////////////////// //////////////////////
-
 
     def __updateViewframe(self):
         self.__messages_label.setText(
@@ -179,109 +187,52 @@ class MainWindow(QtWidgets.QMainWindow):
             )   
         self.__viewport.drawViewportObj(self.__display_file.objects_list)
 
-    def log_message(self, message):
+    def __log_message(self, message):
         self.__console.append(message)
         self.__updateViewframe()
 
     def __add_object(self):
         add_dialog = ObjectSelectionDialog(self.__display_file, self.__object_list)
         add_dialog.exec()
+
+        self.__logs.logAddObject()
         self.__updateViewframe()
-
+    
     def __choose_operation(self):
-        selected_index = self.__object_list.currentRow()
 
+        selected_index = self.__object_list.currentRow()
         if selected_index == -1:
-            self.__show_selection_error()
+            Wnr.show_selection_error()
         else:
             self.__perform_selected_operation(selected_index)
 
-    def __show_selection_error(self):
-        message = QMessageBox()
-        message.setWindowTitle("Aviso")
-        message.setIcon(QMessageBox.Warning)
-        message.setText("Selecione um objeto na lista de objetos para realizar uma operação")
-        message.setStyleSheet("background-color: rgb(212,208,200); color: black;")
-        message.setFixedSize(400, 200)
-        message.exec()
-
     def __perform_selected_operation(self, selected_index):
+
         object_name = self.__object_list.item(selected_index).text()
         operations = Operations(object_name)
         if operations.exec() == QtWidgets.QDialog.DialogCode.Accepted:
-            self.__handle_operation(operations.clicked_button, selected_index)
+            self.__handle_operation(operations.clicked_button)
 
-    def __handle_operation(self, clicked_button, selected_index):
+    def __handle_operation(self, clicked_button):
+
         if clicked_button == "delete":
-            self.__deleteObject(selected_index)
+            self.__deleteObject()
         elif clicked_button == "edit":
-            self.__editObject(selected_index)
+            self.__editObject()
 
-    def __deleteObject(self, index_selected_obj):
+    def __deleteObject(self):
+
         index_selected_obj = self.__object_list.currentRow()      
-        if index_selected_obj != -1:
-            selected_item = self.__object_list.item(index_selected_obj)
-            selected_item_text = selected_item.text()
-            object_name = selected_item_text.split(' (')[0]
-            self.log_message(f"Objeto {object_name} deletado.")
-
+        
+        self.__logs.logDeleteMessage()
         self.__object_list.takeItem(index_selected_obj)
         self.__display_file.removeObject(index_selected_obj)
         self.__updateViewframe()
-    
-    def __editObject(self, index_selected_obj):
-        index_selected_obj = self.__object_list.currentRow()      
-        if index_selected_obj != -1:
-            selected_item = self.__object_list.item(index_selected_obj)
-            if selected_item:
-                selected_item_text = selected_item.text()
-                object_name = selected_item_text.split(' (')[0]
-                selected_object = self.__display_file.get_object(object_name)
-                
-                if selected_object:
-                    edit_window = EditObject(selected_object, self.__display_file, self.__object_list)
-                    
-                    if edit_window.exec() == QtWidgets.QDialog.DialogCode.Accepted:
-                        self.log_message(f"Objeto {object_name} editado.")
-                        self.__updateViewframe()
-                else:
-                    self.log_message("Object not found.")
-            else:
-                self.log_message("No selected item.")
-        else:
-            self.log_message("No object selected.")
 
-    def __moveLeft(self):
-        self.__window.move("left", self.__scaleSpinBox.value())
-        self.log_message(f"Window foi movida pra esquerda em {self.__scaleSpinBox.value()}%.")
-        self.__updateViewframe()
-    
-    # Movimentação para direita
-    def __moveRight(self):
-        self.__window.move("right", self.__scaleSpinBox.value())
-        self.log_message(f"Window foi movida pra direita em {self.__scaleSpinBox.value()}%.")
-        self.__updateViewframe()
-
-    # Movimentação para cima
-    def __moveUp(self):
-        self.__window.move("up", self.__scaleSpinBox.value())
-        self.log_message(f"Window foi movida pra cima em {self.__scaleSpinBox.value()}%.")
-        self.__updateViewframe()
-    
-    # Movimentação para baixo
-    def __moveDown(self):
-        self.__window.move("down", self.__scaleSpinBox.value())
-        self.log_message(f"Window foi movida pra baixo em {self.__scaleSpinBox.value()}%.")
-        self.__updateViewframe()
-    
-    # ZoomIn
-    def __zoomIn(self):
-        self.__window.zoomIn(self.__scaleSpinBox.value())
-        self.log_message(f"Zoom In de {self.__scaleSpinBox.value()}% aplicado.")
-        self.__updateViewframe()
-    
-    # ZoomOut
-    def __zoomOut(self):
-        self.__window.zoomOut(self.__scaleSpinBox.value())
-        self.log_message(f"Zoom Out de {self.__scaleSpinBox.value()}% aplicado.")
-        self.__updateViewframe()
+    def __editObject(self):
+        object_list = self.__object_list
+        display_file = self.__display_file
+        log_message_func = self.__logs
+        update_view_func = self.__updateViewframe
+        object_editor = ObjectEditor(object_list, display_file, log_message_func, update_view_func)
+        object_editor.edit_object()

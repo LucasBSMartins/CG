@@ -1,6 +1,6 @@
-from object import Object
+from objects.object import Object
 from PySide6.QtGui import QColor, QPen
-from setting import Type
+from utils.setting import Type
 
 class Point(Object):
     def __init__(self, name, coord):

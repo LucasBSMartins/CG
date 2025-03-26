@@ -22,7 +22,6 @@ class Object(ABC):
     def tipo(self):
         return self.__tipo
 
-    
     @coord.setter
     def coord(self, new_coord):
         self.__coord = new_coord

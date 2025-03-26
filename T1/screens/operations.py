@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QDialog
 from PySide6 import QtWidgets
-from setting import Settings
+from utils.setting import Settings
 
 class Operations(QDialog):
     def __init__(self, name):

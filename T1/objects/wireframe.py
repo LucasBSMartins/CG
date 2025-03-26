@@ -1,7 +1,7 @@
-from object import Object
-from PySide6.QtGui import QColor, QPen, QPolygonF, QBrush
-from PySide6.QtCore import QPointF, Qt
-from setting import Type
+from objects.object import Object
+from PySide6.QtGui import QColor, QPen, QPolygonF
+from PySide6.QtCore import QPointF
+from utils.setting import Type
 
 class Wireframe(Object):
     def __init__(self, name, coord):
