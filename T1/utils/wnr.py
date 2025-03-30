@@ -39,3 +39,12 @@ class Wnr():
         message.setStyleSheet("background-color: rgb(212,208,200); color: black;")
         message.setFixedSize(400, 200)
         message.exec()
+
+    def invalidValor():
+        message = QMessageBox()
+        message.setWindowTitle("Aviso")
+        message.setIcon(QMessageBox.Warning)
+        message.setText("Valor inválido!")
+        message.setStyleSheet("background-color: rgb(212,208,200); color: black;")
+        message.setFixedSize(400, 200)
+        message.exec()

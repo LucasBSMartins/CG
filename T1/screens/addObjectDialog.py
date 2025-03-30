@@ -39,6 +39,8 @@ class AddObjectDialog(QtWidgets.QDialog):
         self.add_button = QtWidgets.QPushButton("Adicionar")
         self.add_button.clicked.connect(self.add_object)
         self.layout.addWidget(self.add_button)
+        self.add_button.setAutoDefault(False)
+        self.add_button.setDefault(False)
 
     def add_fields(self):
         """Gera dinamicamente os campos de entrada conforme o tipo de objeto."""
@@ -46,6 +48,8 @@ class AddObjectDialog(QtWidgets.QDialog):
             self.scroll_layout.addWidget(QtWidgets.QLabel("Coordenadas (X, Y):"))
             self.x_input = QtWidgets.QLineEdit(self)
             self.y_input = QtWidgets.QLineEdit(self)
+            self.x_input.setText("0")
+            self.y_input.setText("0")
             self.scroll_layout.addWidget(self.x_input)
             self.scroll_layout.addWidget(self.y_input)
 
@@ -53,12 +57,16 @@ class AddObjectDialog(QtWidgets.QDialog):
             self.scroll_layout.addWidget(QtWidgets.QLabel("Ponto 1 (X1, Y1):"))
             self.x1_input = QtWidgets.QLineEdit(self)
             self.y1_input = QtWidgets.QLineEdit(self)
+            self.x1_input.setText("0")
+            self.y1_input.setText("0")
             self.scroll_layout.addWidget(self.x1_input)
             self.scroll_layout.addWidget(self.y1_input)
 
             self.scroll_layout.addWidget(QtWidgets.QLabel("Ponto 2 (X2, Y2):"))
             self.x2_input = QtWidgets.QLineEdit(self)
             self.y2_input = QtWidgets.QLineEdit(self)
+            self.x2_input.setText("0")
+            self.y2_input.setText("0")
             self.scroll_layout.addWidget(self.x2_input)
             self.scroll_layout.addWidget(self.y2_input)
 
@@ -88,6 +96,8 @@ class AddObjectDialog(QtWidgets.QDialog):
             label = QtWidgets.QLabel(f"Ponto {i+1} (X, Y):")
             x_input = QtWidgets.QLineEdit(self)
             y_input = QtWidgets.QLineEdit(self)
+            x_input.setText("0")
+            y_input.setText("0")
             self.points_container.addWidget(label)
             self.points_container.addWidget(x_input)
             self.points_container.addWidget(y_input)
@@ -121,7 +131,7 @@ class AddObjectDialog(QtWidgets.QDialog):
                 Wnr.noPoints()
                 return
             if not is_valid_number(x) or not is_valid_number(y):
-                Wnr.noPoints() 
+                Wnr.invalidValor() 
                 return
             x, y = int(x), int(y)
             addpoint = AddPoint()
@@ -137,7 +147,7 @@ class AddObjectDialog(QtWidgets.QDialog):
                 Wnr.noPoints()
                 return
             if not (is_valid_number(x1) and is_valid_number(y1) and is_valid_number(x2) and is_valid_number(y2)):
-                Wnr.noPoints()  
+                Wnr.invalidValor()  
                 return
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
             addLine = AddLine()
@@ -151,7 +161,7 @@ class AddObjectDialog(QtWidgets.QDialog):
                 Wnr.noPoints()
                 return
             if any(not is_valid_number(x) or not is_valid_number(y) for x, y in pontos):
-                Wnr.noPoints()  
+                Wnr.invalidValor()  
                 return
             pontos = [(int(x.text().strip()), int(y.text().strip())) for x, y in self.point_inputs]
 

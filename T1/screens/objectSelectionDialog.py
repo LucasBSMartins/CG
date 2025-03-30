@@ -20,6 +20,8 @@ class ObjectSelectionDialog(QtWidgets.QDialog):
        
         self.next_button = QtWidgets.QPushButton("Avançar")
         self.next_button.clicked.connect(self.next_step)
+        self.next_button.setAutoDefault(False)
+        self.next_button.setDefault(False)
         self.layout.addWidget(self.next_button)
 
         self.selected_object = None

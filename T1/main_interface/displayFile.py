@@ -6,11 +6,11 @@ class DisplayFile:
     # Adiciona um objeto nessa lista
     def addObject(self, g_object):
         self.__objects_list.append(g_object)
+
     # Remove objeto dessa lista
     def removeObject(self, i):
         self.__objects_list.pop(i)
     
-    #
     def get_names(self):
         return [obj.name for obj in self.__objects_list]
 

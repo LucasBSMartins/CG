@@ -6,7 +6,7 @@ class Operations(QDialog):
     def __init__(self, name):
         super().__init__()
 
-        self.setFixedSize(400, 100)
+        self.setFixedSize(500, 100)
         self.setWindowTitle("Operações")
         self.setStyleSheet(f"{Settings.backgroundColor()}; color: black;")
 
@@ -16,10 +16,12 @@ class Operations(QDialog):
         self.__edit_button = QtWidgets.QPushButton("Editar")
         self.__delete_button = QtWidgets.QPushButton("Deletar")
         self.__cancel_button = QtWidgets.QPushButton("Cancelar")
+        self.__transformation_button = QtWidgets.QPushButton("Transformações")
         
         self.__cancel_button.clicked.connect(self.reject)
         self.__delete_button.clicked.connect(lambda: self.accept("delete"))
         self.__edit_button.clicked.connect(lambda: self.accept("edit"))
+        self.__transformation_button.clicked.connect(lambda: self.accept("transform"))
 
         # Layout
         self.__layout = QtWidgets.QGridLayout(self)
@@ -27,6 +29,8 @@ class Operations(QDialog):
         self.__layout.addWidget(self.__cancel_button, 1, 0)
         self.__layout.addWidget(self.__delete_button, 1, 1)
         self.__layout.addWidget(self.__edit_button, 1, 2)
+        self.__layout.addWidget(self.__transformation_button, 1, 3)
+        
 
     def accept(self, button_name):
         self.__clicked_button = button_name

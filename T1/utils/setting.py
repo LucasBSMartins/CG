@@ -34,6 +34,16 @@ class Settings():
     def windowXmax():
         return 1000
     
+    # Menor coordenada possível para x ou y do objeto
+    @staticmethod
+    def min_coord():
+        return -1000000000
+    
+    # Maior coordenada possível para x ou y do objeto
+    @staticmethod
+    def max_coord():
+        return 1000000000
+    
     # x min inicial da window
     @staticmethod
     def windowXmin():
@@ -79,3 +89,8 @@ class Type(Enum):
     POINT = 1
     LINE = 2
     WIREFRAME = 3
+
+class RotationType(Enum):
+    OBJECT_CENTER = "Centro do objeto"
+    WORLD_CENTER = "Centro do mundo"
+    ARBITRARY_POINT = "Ponto Arbitrário"

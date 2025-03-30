@@ -33,7 +33,6 @@ class Object(ABC):
     def name(self, new_name):
         self.__name = new_name
 
-
     """
     Método usado para cálculo da matriz resultante
     """
@@ -54,8 +53,6 @@ class Object(ABC):
             print(r)
 
         return result
-
-
 
     """
     Métodos abaixo para realizar o calculo da matriz resultante de transformação

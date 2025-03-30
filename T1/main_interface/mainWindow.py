@@ -10,6 +10,7 @@ from main_interface.viewport import Viewport
 from main_interface.displayFile import DisplayFile
 from utils.setting import Settings
 from utils.moveToSecondMonitor import MoveMonitor
+from screens.transformObjectDialog import TransformObjectDialog
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -25,7 +26,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.__painter()
 
-        #MoveMonitor.center_on_second_monitor(self)
+        MoveMonitor.center_on_second_monitor(self)
 
     # Contrução de frames
     def __buildFrame(self, parent, x, y, w, h):
@@ -120,11 +121,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__object_list = QtWidgets.QListWidget(self.__objects_frame)
         self.__object_list.setGeometry(5, 10, 190, 150)
         self.__object_list.setStyleSheet("background-color: white; color: black; border: 1px solid black;")
-        object_list = self.__object_list
-
+    
         # Criando sistema de logs
         log_message_func = self.__log_message
-        self.__logs = Logs(log_message_func, object_list)
+        self.__logs = Logs(log_message_func, self.__object_list)
+
         
 
         # ///////////////// ////////////////////// //////////////////////
@@ -231,7 +232,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__deleteObject()
         elif clicked_button == "edit":
             self.__editObject()
+        elif clicked_button == "transform":
+            self.__transformObject()
 
+    def __transformObject(self):
+        transform_dialog = TransformObjectDialog(self.__display_file, self.__object_list)
+        transform_dialog.exec()
 
     # Método para deletar um objeto selecionado
     def __deleteObject(self):
