@@ -5,11 +5,11 @@ from utils.setting import Type
 
 class Wireframe(Object):
     """Classe que representa um objeto gráfico do tipo Wireframe (polígono fechado)"""
-    def __init__(self, name, coord):
-        super().__init__(name, Type.WIREFRAME, coord)
+    def __init__(self, name, coord, color):
+        super().__init__(name, Type.WIREFRAME, coord, color)
 
     def draw(self, coord_viewport, painter):
-        pen = QPen(QColor('black'), 3)
+        pen = QPen(QColor(self._Object__color), 3)
         painter.setPen(pen)
 
         for i, (x, y) in enumerate(coord_viewport):

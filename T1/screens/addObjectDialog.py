@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QLabel, QLineEdit
 from utils.wnr import Wnr
 from tools.addPoint import AddPoint
 from tools.addLine import AddLine
+from screens.colorPickerWidget import ColorPickerWidget
 from tools.addWireframe import AddWireframe
 
 class AddObjectDialog(QtWidgets.QDialog):
@@ -35,6 +36,8 @@ class AddObjectDialog(QtWidgets.QDialog):
         self.layout.addWidget(self.scroll_area)
 
         self.add_fields()
+        self.color_picker = ColorPickerWidget()
+        self.layout.addWidget(self.color_picker)
 
         self.add_button = QtWidgets.QPushButton("Adicionar")
         self.add_button.clicked.connect(self.add_object)
@@ -123,6 +126,9 @@ class AddObjectDialog(QtWidgets.QDialog):
                 return True
             except ValueError:
                 return False
+
+        selected_color = self.color_picker.get_selected_color()
+        print("Cor escolhida:", selected_color)
         
         if self.selected_object == "Ponto":
             x = self.x_input.text().strip()
@@ -135,7 +141,7 @@ class AddObjectDialog(QtWidgets.QDialog):
                 return
             x, y = int(x), int(y)
             addpoint = AddPoint()
-            point = addpoint.create(nome, [(x, y)])
+            point = addpoint.create(nome, [(x, y)], selected_color)
             self.__displayFile.addObject(point)           
             
         elif self.selected_object == "Reta":
@@ -151,7 +157,7 @@ class AddObjectDialog(QtWidgets.QDialog):
                 return
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
             addLine = AddLine()
-            line = addLine.create(nome, [(x1, y1), (x2, y2)])
+            line = addLine.create(nome, [(x1, y1), (x2, y2)], selected_color)
             self.__displayFile.addObject(line)
             
         elif self.selected_object == "Polígono":
@@ -166,7 +172,7 @@ class AddObjectDialog(QtWidgets.QDialog):
             pontos = [(int(x.text().strip()), int(y.text().strip())) for x, y in self.point_inputs]
 
             addWireframe = AddWireframe(qtd)
-            wireframe = addWireframe.create(nome, pontos)
+            wireframe = addWireframe.create(nome, pontos, selected_color)
             self.__displayFile.addObject(wireframe)
         
         self.__objectList.addItem(str(nome) + " (" + self.selected_object + ")")  

@@ -4,10 +4,11 @@ from math import sin, cos
 class Object(ABC):
     # Classe abstrata de objeto, que será estendida no código 
     # para representação dos três tipos de objeto
-    def __init__(self, name, tipo, coord):
+    def __init__(self, name, tipo, coord, color):
         self.__name = name
         self.__tipo = tipo
         self.__coord = coord
+        self.__color = color
 
     @abstractmethod
     def draw(self, transformed_coord, painter):
