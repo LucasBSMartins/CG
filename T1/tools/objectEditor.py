@@ -11,6 +11,7 @@ class ObjectEditor:
 
     def edit_object(self):
         """Handles the process of selecting and editing an object."""
+        
         index_selected_obj = self.__object_list.currentRow()      
         if index_selected_obj != -1:
             selected_item = self.__object_list.item(index_selected_obj)
@@ -24,8 +25,11 @@ class ObjectEditor:
                     
                     if edit_window.exec() == QtWidgets.QDialog.DialogCode.Accepted:
                         updated_object = edit_window.object_to_edit
-                        selected_item.setText(updated_object.name) 
+
                         self.__display_file.updateObject(index_selected_obj, updated_object)
+                        self.__object_list.takeItem(index_selected_obj)
+                        self.__object_list.insertItem(index_selected_obj, updated_object.name + edit_window.object_type)
+                    
                         self.__updateViewframe()
                         self.__log_message.logObjectEdited(object_name)
                 else:

@@ -150,7 +150,7 @@ class EditObject(QtWidgets.QDialog):
                 return
             x, y = int(x), int(y)
             self.object_to_edit.coord = [(x, y)]
-            self.object_to_edit.name = str(nome) + " (Ponto)" 
+            self.object_to_edit.name = str(nome) 
             self.object_to_edit.color = selected_color
             
             
@@ -167,7 +167,7 @@ class EditObject(QtWidgets.QDialog):
                 return
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
             self.object_to_edit.coord = [(x1, y1), (x2, y2)] 
-            self.object_to_edit.name = str(nome) + " (Reta)" 
+            self.object_to_edit.name = str(nome) 
             self.object_to_edit.color = selected_color
 
 
@@ -182,7 +182,15 @@ class EditObject(QtWidgets.QDialog):
             pontos = [(int(x.text().strip()), int(y.text().strip())) for x, y in self.point_inputs]
 
             self.object_to_edit.coord = pontos
-            self.object_to_edit.name = str(nome) + " (Polígono)"  
+            self.object_to_edit.name = str(nome)
             self.object_to_edit.color = selected_color
+        self.object_type = ""
+        if isinstance(self.object_to_edit, Point):
+            self.object_type = " (Ponto)"
+        elif isinstance(self.object_to_edit, Line):
+            self.object_type = " (Reta)"
+        elif isinstance(self.object_to_edit, Wireframe):
+            self.object_type = " (Polígono)"
 
+        
         self.accept()
