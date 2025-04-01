@@ -1,5 +1,5 @@
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QLabel, QLineEdit
+from PySide6.QtWidgets import QLabel, QLineEdit, QDoubleSpinBox
 from objects.point import Point
 from objects.line import Line
 from utils.wnr import Wnr
@@ -49,35 +49,51 @@ class EditObject(QtWidgets.QDialog):
     def add_fields(self):
         if isinstance(self.selected_object, Point):
             self.scroll_layout.addWidget(QtWidgets.QLabel("Coordenadas (X, Y):"))
-            self.x_input = QtWidgets.QLineEdit(self)
-            self.y_input = QtWidgets.QLineEdit(self)
+            
+            self.x_input = QDoubleSpinBox(self)
+            self.y_input = QDoubleSpinBox(self)
+            
+            self.x_input.setDecimals(0)  
+            self.y_input.setDecimals(0)
+            self.x_input.setMaximum(1000000000)
+            self.y_input.setMaximum(1000000000)
             
             x_coord, y_coord = self.object_to_edit.coord[0] 
-            self.x_input.setText(str(x_coord))
-            self.y_input.setText(str(y_coord))
+            self.x_input.setValue(x_coord)
+            self.y_input.setValue(y_coord)
 
             self.scroll_layout.addWidget(self.x_input)
             self.scroll_layout.addWidget(self.y_input)
 
         elif isinstance(self.selected_object, Line):
             self.scroll_layout.addWidget(QtWidgets.QLabel("Ponto 1 (X1, Y1):"))
-            self.x1_input = QtWidgets.QLineEdit(self)
-            self.y1_input = QtWidgets.QLineEdit(self)
+            self.x1_input = QDoubleSpinBox(self)
+            self.y1_input = QDoubleSpinBox(self)
+            
+            self.x1_input.setDecimals(0)
+            self.y1_input.setDecimals(0)
+            self.x1_input.setMaximum(1000000000)
+            self.y1_input.setMaximum(1000000000)
             
             x1_coord, y1_coord = self.object_to_edit.coord[0]  
-            self.x1_input.setText(str(x1_coord))
-            self.y1_input.setText(str(y1_coord))
+            self.x1_input.setValue(x1_coord)
+            self.y1_input.setValue(y1_coord)
             
             self.scroll_layout.addWidget(self.x1_input)
             self.scroll_layout.addWidget(self.y1_input)
 
             self.scroll_layout.addWidget(QtWidgets.QLabel("Ponto 2 (X2, Y2):"))
-            self.x2_input = QtWidgets.QLineEdit(self)
-            self.y2_input = QtWidgets.QLineEdit(self)
+            self.x2_input = QDoubleSpinBox(self)
+            self.y2_input = QDoubleSpinBox(self)
             
+            self.x2_input.setDecimals(0)
+            self.y2_input.setDecimals(0)
+            self.x2_input.setMaximum(1000000000)
+            self.y2_input.setMaximum(1000000000)
+
             x2_coord, y2_coord = self.object_to_edit.coord[1]
-            self.x2_input.setText(str(x2_coord))
-            self.y2_input.setText(str(y2_coord))
+            self.x2_input.setValue(x2_coord)
+            self.y2_input.setValue(y2_coord)
 
             self.scroll_layout.addWidget(self.x2_input)
             self.scroll_layout.addWidget(self.y2_input)
@@ -105,16 +121,23 @@ class EditObject(QtWidgets.QDialog):
 
         for i in range(qtd_pontos):
             label = QtWidgets.QLabel(f"Ponto {i+1} (X, Y):")
-            x_input = QtWidgets.QLineEdit(self)
-            y_input = QtWidgets.QLineEdit(self)
+            x_input = QtWidgets.QDoubleSpinBox(self)
+            y_input = QtWidgets.QDoubleSpinBox(self)
+
+            x_input.setDecimals(0)  
+            y_input.setDecimals(0)  
+            
+            x_input.setMaximum(1000000000)  
+            y_input.setMaximum(1000000000)
+
             self.point_inputs.append((x_input, y_input))
             self.points_container.addWidget(label)
             self.points_container.addWidget(x_input)
             self.points_container.addWidget(y_input)
             
             if i < len(self.object_to_edit.coord):
-                x_input.setText(str(self.object_to_edit.coord[i][0])) 
-                y_input.setText(str(self.object_to_edit.coord[i][1]))
+                x_input.setValue(self.object_to_edit.coord[i][0]) 
+                y_input.setValue(self.object_to_edit.coord[i][1])
 
         self.scroll_widget.setLayout(self.scroll_layout)
 

@@ -49,27 +49,44 @@ class AddObjectDialog(QtWidgets.QDialog):
         """Gera dinamicamente os campos de entrada conforme o tipo de objeto."""
         if self.selected_object == "Ponto":
             self.scroll_layout.addWidget(QtWidgets.QLabel("Coordenadas (X, Y):"))
-            self.x_input = QtWidgets.QLineEdit(self)
-            self.y_input = QtWidgets.QLineEdit(self)
-            self.x_input.setText("0")
-            self.y_input.setText("0")
+
+            self.x_input = QtWidgets.QDoubleSpinBox(self)
+            self.y_input = QtWidgets.QDoubleSpinBox(self)
+
+            self.x_input.setMaximum(1000000000)
+            self.y_input.setMaximum(1000000000)
+            self.x_input.setDecimals(0)
+            self.y_input.setDecimals(0) 
+            
+            self.x_input.setValue(0) 
+            self.y_input.setValue(0)
             self.scroll_layout.addWidget(self.x_input)
             self.scroll_layout.addWidget(self.y_input)
 
         elif self.selected_object == "Reta":
             self.scroll_layout.addWidget(QtWidgets.QLabel("Ponto 1 (X1, Y1):"))
-            self.x1_input = QtWidgets.QLineEdit(self)
-            self.y1_input = QtWidgets.QLineEdit(self)
-            self.x1_input.setText("0")
-            self.y1_input.setText("0")
+            self.x1_input = QtWidgets.QDoubleSpinBox(self)
+            self.y1_input = QtWidgets.QDoubleSpinBox(self)
+            self.x1_input.setMaximum(1000000000)  
+            self.y1_input.setMaximum(1000000000)
+            self.x1_input.setDecimals(0)  
+            self.y1_input.setDecimals(0)  
+            
+            self.x1_input.setValue(0)  
+            self.y1_input.setValue(0)  
             self.scroll_layout.addWidget(self.x1_input)
             self.scroll_layout.addWidget(self.y1_input)
 
             self.scroll_layout.addWidget(QtWidgets.QLabel("Ponto 2 (X2, Y2):"))
-            self.x2_input = QtWidgets.QLineEdit(self)
-            self.y2_input = QtWidgets.QLineEdit(self)
-            self.x2_input.setText("0")
-            self.y2_input.setText("0")
+            self.x2_input = QtWidgets.QDoubleSpinBox(self)
+            self.y2_input = QtWidgets.QDoubleSpinBox(self)
+            self.x2_input.setMaximum(1000000000) 
+            self.y2_input.setMaximum(1000000000)
+            self.x2_input.setDecimals(0)  
+            self.y2_input.setDecimals(0)  
+            
+            self.x2_input.setValue(0)
+            self.y2_input.setValue(0)
             self.scroll_layout.addWidget(self.x2_input)
             self.scroll_layout.addWidget(self.y2_input)
 
@@ -97,10 +114,17 @@ class AddObjectDialog(QtWidgets.QDialog):
 
         for i in range(qtd_pontos):
             label = QtWidgets.QLabel(f"Ponto {i+1} (X, Y):")
-            x_input = QtWidgets.QLineEdit(self)
-            y_input = QtWidgets.QLineEdit(self)
-            x_input.setText("0")
-            y_input.setText("0")
+           
+            x_input = QtWidgets.QDoubleSpinBox(self)
+            y_input = QtWidgets.QDoubleSpinBox(self)
+
+            x_input.setMaximum(1000000000)  
+            y_input.setMaximum(1000000000)
+            x_input.setDecimals(0)  
+            y_input.setDecimals(0)
+
+            x_input.setValue(0)
+            y_input.setValue(0)
             self.points_container.addWidget(label)
             self.points_container.addWidget(x_input)
             self.points_container.addWidget(y_input)
