@@ -128,8 +128,7 @@ class AddObjectDialog(QtWidgets.QDialog):
                 return False
 
         selected_color = self.color_picker.get_selected_color()
-        print("Cor escolhida:", selected_color)
-        
+       
         if self.selected_object == "Ponto":
             x = self.x_input.text().strip()
             y = self.y_input.text().strip()

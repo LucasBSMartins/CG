@@ -28,6 +28,15 @@ class EscalonamentoDialog(QDialog):
         self.layout.addWidget(self.next_button, 1, 1)
 
     def next_step(self):
-        ObjectTransformator()
+        scale = self.__scale_input.value()
+        
+        self.__selected = self.__objectList.currentRow()
+        selected_item = self.__objectList.item(self.__selected)
+        selected_item_text = selected_item.text()
+        object_name = selected_item_text.split(' (')[0]
+        selected_object = self.__displayFile.get_object(object_name)
+        transformator = ObjectTransformator(selected_object)
+        transformator.scaleObject(scale)
+
         self.accept()
         

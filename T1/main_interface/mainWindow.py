@@ -126,8 +126,6 @@ class MainWindow(QtWidgets.QMainWindow):
         log_message_func = self.__log_message
         self.__logs = Logs(log_message_func, self.__object_list)
 
-        
-
         # ///////////////// ////////////////////// //////////////////////
 
         # ///////////////// Gerando labels //////////////////////
@@ -236,8 +234,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__transformObject()
 
     def __transformObject(self):
+        
         transform_dialog = TransformObjectDialog(self.__display_file, self.__object_list)
         transform_dialog.exec()
+        self.__updateViewframe()
 
     # Método para deletar um objeto selecionado
     def __deleteObject(self):

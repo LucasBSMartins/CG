@@ -1,65 +1,46 @@
-from math import cos, sin
+import numpy as np
 from tools.matrixGenerator import MatrixGenerator as MG
 
-class Transformations():
+class Transformations:
     def __init__(self):
         self.__mg = MG()
 
-    def translation(self, base, dx, dy):
-        
-        resultante = [[0, 0, 0]]
-
+    def translation(self, objeto, dx, dy):
         matriz_reposicionamento = self.__mg.generateTranslationMatrix(dx, dy)
-
-        for i in range(len(base)):
-            # Iterando nas colunas da matriz de transformação
-            for j in range(len(matriz_reposicionamento[0])):
-
-                for k in range(len(matriz_reposicionamento)):
-                    resultante[i][j] += base[i][k] * matriz_reposicionamento[k][j]
-
-        return resultante
-
-    def rotation(self, base, coef_rotacao):
-        
-        resultante = [[0, 0, 0]]
-
-        matriz_reposicionamento = self.__mg.generateTranslationMatrix(coef_rotacao)
-
-        for i in range(len(base)):
-            # Iterando nas colunas da matriz de transformação
-            for j in range(len(matriz_reposicionamento[0])):
-
-                for k in range(len(matriz_reposicionamento)):
-                    resultante[i][j] += base[i][k] * matriz_reposicionamento[k][j]
-
-        return resultante
-
-    def scaling (self, base, sx, sy):
-
-        resultante = [[0, 0, 0]]
-
-        # Escalonamento representa o S0 e S1 da matriz passada em aula
-        matriz_reposicionamento = self.__mg.generateTranslationMatrix(sx, sy)
-
-        for i in range(len(base)):
-            # Iterando nas colunas da matriz de transformação
-            for j in range(len(matriz_reposicionamento[0])):
-
-                for k in range(len(matriz_reposicionamento)):
-                    resultante[i][j] += base[i][k] * matriz_reposicionamento[k][j]
-
-        return resultante
+        return self._apply_transformation(objeto, matriz_reposicionamento)
     
-    def transformacao_resultante(self, reposicionamento):
+    def rotateAroundObjectCenter(self, objeto, theta):
+        center_coord = objeto.getCenter()
 
-        result = [[0, 0, 0]]
-        # Iterando nas coordenadas do objeto
-        for i in range(len(self.coord)):
-            # Iterando nas colunas da matriz de transformação
-            for j in range(len(reposicionamento[0])):
+        translating = self.__mg.generateTranslationMatrix(-center_coord[0], -center_coord[1])
+        rotation_matrix = self.__mg.generateRotationMatrix(theta)
+        translating_back = self.__mg.generateTranslationMatrix(center_coord[0], center_coord[1])
+        
+        matriz_reposicionamento = np.matmul(np.matmul(translating, rotation_matrix), translating_back)
+        return self._apply_transformation(objeto, matriz_reposicionamento)
+    
+    # Faz a rotação do objeto em torno do centro do mundo
+    def rotateAroundWorldCenter(self, objeto, theta):
+        matriz_reposicionamento = self.__mg.generateRotationMatrix(theta)
+        return self._apply_transformation(objeto, matriz_reposicionamento)
 
-                for k in range(len(reposicionamento)):
-                    result[i][j] += self.coord[i][k] * reposicionamento[k][j]
+    # Faz a rotação do objeto em torno de um ponto arbitrário
+    def rotateAroundArbitraryPoint(self, objeto, theta, coord):
+        translating = self.__mg.generateTranslationMatrix(-coord[0], -coord[1])
+        rotation_matrix = self.__mg.generateRotationMatrix(theta)
+        translating_back = self.__mg.generateTranslationMatrix(coord[0], coord[1])
 
-        return result
+        matriz_reposicionamento = np.matmul(np.matmul(translating, rotation_matrix), translating_back)
+        return self._apply_transformation(objeto, matriz_reposicionamento)
+
+    def scaling(self, objeto, sx, sy):
+        matriz_reposicionamento = self.__mg.generateScalingMatrix(sx, sy)
+        return self._apply_transformation(objeto, matriz_reposicionamento)
+
+    def _apply_transformation(self, objeto, transformation_matrix):
+        new_coord = []
+        for x, y in objeto.coord:
+            new = np.matmul(np.array([x, y, 1]), transformation_matrix).tolist()
+            new_coord.append([new[0], new[1]])
+        print(new_coord)
+        return new_coord

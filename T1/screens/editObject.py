@@ -4,6 +4,7 @@ from objects.point import Point
 from objects.line import Line
 from utils.wnr import Wnr
 from objects.wireframe import Wireframe
+from screens.colorPickerWidget import ColorPickerWidget
 
 
 class EditObject(QtWidgets.QDialog):
@@ -38,6 +39,8 @@ class EditObject(QtWidgets.QDialog):
         self.layout.addWidget(self.scroll_area)
 
         self.add_fields()
+        self.color_picker = ColorPickerWidget()
+        self.layout.addWidget(self.color_picker)
 
         self.add_button = QtWidgets.QPushButton("Salvar")
         self.add_button.clicked.connect(self.save_object)
@@ -134,6 +137,8 @@ class EditObject(QtWidgets.QDialog):
             except ValueError:
                 return False
         
+        selected_color = self.color_picker.get_selected_color()
+
         if isinstance(self.selected_object, Point):
             x = self.x_input.text().strip()
             y = self.y_input.text().strip()
@@ -146,6 +151,7 @@ class EditObject(QtWidgets.QDialog):
             x, y = int(x), int(y)
             self.object_to_edit.coord = [(x, y)]
             self.object_to_edit.name = str(nome) + " (Ponto)" 
+            self.object_to_edit.color = selected_color
             
             
         elif isinstance(self.selected_object, Line):
@@ -162,6 +168,8 @@ class EditObject(QtWidgets.QDialog):
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
             self.object_to_edit.coord = [(x1, y1), (x2, y2)] 
             self.object_to_edit.name = str(nome) + " (Reta)" 
+            self.object_to_edit.color = selected_color
+
 
         elif isinstance(self.selected_object, Wireframe):
             pontos = [(x.text().strip(), y.text().strip()) for x, y in self.point_inputs]
@@ -175,5 +183,6 @@ class EditObject(QtWidgets.QDialog):
 
             self.object_to_edit.coord = pontos
             self.object_to_edit.name = str(nome) + " (Polígono)"  
-          
+            self.object_to_edit.color = selected_color
+
         self.accept()

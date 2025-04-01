@@ -33,5 +33,15 @@ class TranslationDialog(QDialog):
         self.layout.addWidget(self.next_button, 2, 1)
 
     def next_step(self):
-        ObjectTransformator()
+        dx = self.__translation_dx.value()
+        dy = self.__translation_dy.value()
+        
+        self.__selected = self.__objectList.currentRow()
+        selected_item = self.__objectList.item(self.__selected)
+        selected_item_text = selected_item.text()
+        object_name = selected_item_text.split(' (')[0]
+        selected_object = self.__displayFile.get_object(object_name)
+        transformator = ObjectTransformator(selected_object)
+        transformator.translateObject(dx, dy)
+
         self.accept()

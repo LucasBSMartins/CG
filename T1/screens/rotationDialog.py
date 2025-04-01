@@ -33,10 +33,12 @@ class RotationDialog(QDialog):
         self.__rotation_dx_label = QLabel("Coordenada do ponto X:")
         self.__rotation_dx_input = QDoubleSpinBox()
         self.__rotation_dx_input.setRange(Settings.min_coord(), Settings.max_coord())
-        
+        self.__rotation_dx_input.setDecimals(0)
+
         self.__rotation_dy_label = QLabel("Coordenada do ponto Y:")
         self.__rotation_dy_input = QDoubleSpinBox()
         self.__rotation_dy_input.setRange(Settings.min_coord(), Settings.max_coord())
+        self.__rotation_dy_input.setDecimals(0)
         
         # Layout
         self.layout.addWidget(rotation_label, 0, 0)
@@ -66,6 +68,23 @@ class RotationDialog(QDialog):
         self.__rotation_dy_input.setVisible(is_arbitrary)
 
     def next_step(self):
-        ObjectTransformator()
-        self.accept()
+        angle = self.__angle_input.value()
+        rotation_type = self.__rotation_type.currentText()
+
+        self.__selected = self.__objectList.currentRow()
+        selected_item = self.__objectList.item(self.__selected)
+        selected_item_text = selected_item.text()
+        object_name = selected_item_text.split(' (')[0]
+        selected_object = self.__displayFile.get_object(object_name)
+        transformator = ObjectTransformator(selected_object)
         
+        if rotation_type == RotationType.OBJECT_CENTER.value:
+            transformator.rotateObjectCenter(angle)
+        elif rotation_type == RotationType.WORLD_CENTER.value:
+            transformator.rotateWorldCenter(angle)
+        elif rotation_type == RotationType.ARBITRARY_POINT.value:
+            x = self.__rotation_dx_input.value()
+            y = self.__rotation_dy_input.value()
+            transformator.rotateArbitraryPoint(angle, (x, y))
+
+        self.accept()
