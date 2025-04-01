@@ -34,6 +34,14 @@ class Object(ABC):
     def name(self, new_name):
         self.__name = new_name
 
+    @property
+    def color(self):
+        return self.__color
+
+    @color.setter
+    def color(self, color):
+        self.__color = color
+
     def getCenter(self):
         if not self.__coord:
             return (0, 0)

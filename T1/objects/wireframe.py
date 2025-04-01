@@ -9,7 +9,7 @@ class Wireframe(Object):
         super().__init__(name, Type.WIREFRAME, coord, color)
 
     def draw(self, coord_viewport, painter):
-        pen = QPen(QColor(self._Object__color), 3)
+        pen = QPen(QColor(self.color), 3)
         painter.setPen(pen)
 
         for i, (x, y) in enumerate(coord_viewport):

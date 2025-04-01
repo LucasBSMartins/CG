@@ -8,6 +8,6 @@ class Point(Object):
         super().__init__(name, Type.POINT, coord, color)
     
     def draw(self, coord_viewport, painter):
-        pen = QPen(QColor(self._Object__color), 3)
+        pen = QPen(QColor(self.color), 3)
         painter.setPen(pen)
         painter.drawPoint(coord_viewport[0][0], coord_viewport[0][1])
