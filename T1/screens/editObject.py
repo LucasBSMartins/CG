@@ -152,7 +152,7 @@ class EditObject(QtWidgets.QDialog):
             if nome in self.__displayFile.get_names() and nome != self.object_to_edit.name:  
                 Wnr.repeatedName()
                 return
-        
+
         def is_valid_number(value):
             try:
                 int(value)

@@ -1,6 +1,5 @@
 from PySide6 import QtWidgets
 
-from screens.addObjectDialog import AddObjectDialog
 from screens.translationDialog import TranslationDialog
 from screens.escalonamentoDialog import EscalonamentoDialog
 from screens.rotationDialog import RotationDialog

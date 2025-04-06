@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QLabel
 from PySide6.QtGui import QPixmap, QPainter
 from PySide6.QtCore import Qt
 from utils.setting import Settings
+import numpy as np
 
 class Viewport(QLabel):
     def __init__(self, parent, window):
@@ -25,30 +26,46 @@ class Viewport(QLabel):
         """
         self.__pix_map.fill(Qt.white)
         painter = QPainter(self.__pix_map)
+        
+        # Normalizar as coordenadas
+        normalized_coords = self.__normalizeCoords(objts)
 
-        for obj in objts:
-            # Converte as coordenadas do objeto para o espaço do viewport
-            coord_viewport = [
-                (self.__calcularXviewport(coord[0]), self.__calcularYviewport(coord[1]))
-                for coord in obj.coord
-            ]
-            # Desenha o objeto na viewport
+        # Desenha todos os objetos de obj_list (e transforma pra Viewport)
+        for idx, obj in enumerate(objts):
+            coord_viewport = []
+            for coord in normalized_coords[idx]:
+                x_viewport = self.__calcularXviewport(coord[0])
+                y_viewport = self.__calcularYviewport(coord[1])
+                coord_viewport.append((x_viewport, y_viewport))
             obj.draw(coord_viewport, painter)
-
-        # Atualiza a exibição
+        
         self.setPixmap(self.__pix_map)
+    
+    # Normalizar coordenadas
+    def __normalizeCoords(self, obj_list):
+        transforming_matrix = self.__window.windowNormalize()
+        
+        # Coordenadas normalizadas de todos objetos da tela
+        normalized_coords = []
+        for obj in obj_list:
+            obj_transformed_coords = []
+            for x, y in obj.coord:
+                transformed_coord = (np.dot(np.array([x, y, 1]), np.array(transforming_matrix))).tolist()
+                obj_transformed_coords.append(transformed_coord[:2])
+            normalized_coords.append(obj_transformed_coords)
+        return normalized_coords
 
-    def __calcularXviewport(self, Xw):
+    def __calcularXviewport(self, Xn):
         """
-        Converte uma coordenada X do mundo para a coordenada correspondente no viewport.
+        Converte uma coordenada X normalizada (SCN) para a coordenada correspondente no viewport.
         """
         viewport_variance = Settings.viewportXmax() - Settings.viewportXmin()
-        return (((Xw - self.__window.xw_min)/(self.__window.xw_max - self.__window.xw_min)) * viewport_variance)
-    
-    def __calcularYviewport(self, Yw):
+        return ((Xn  - (-1))/(1- (-1))) * viewport_variance
+
+    def __calcularYviewport(self, Yn):
         """
-        Converte uma coordenada Y do mundo para a coordenada correspondente no viewport.
-        O eixo Y do viewport é invertido em relação ao mundo.
+        Converte uma coordenada Y normalizada (SCN) para a coordenada correspondente no viewport.
+        O eixo Y do viewport é invertido.
         """
         viewport_variance = Settings.viewportYmax() - Settings.viewportYmin()
-        return ((1 - ((Yw - self.__window.yw_min)/ (self.__window.yw_max - self.__window.yw_min))) * viewport_variance)
+        return ((1 - ((Yn - (-1))/ (1 - (-1)))) * viewport_variance)

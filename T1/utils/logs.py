@@ -51,3 +51,5 @@ class Logs:
     def logZoomOut(self, scale):
         self.__log_message(f"Zoom Out de {scale}% aplicado.")
 
+    def logWindowRotation(self, scale):
+        self.__log_message(f"Rotação de {scale}% aplicada na window.")

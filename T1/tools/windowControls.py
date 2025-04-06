@@ -36,3 +36,8 @@ class WindowControls:
             self.__window.zoomOut(self.__scaleSpinBox.value())
             self.__logs.logZoomOut(self.__scaleSpinBox.value())
         self.__updateViewframe()
+
+    def rotate_window(self, angle):
+        self.__window.rotate(angle)
+        self.__logs.logWindowRotation(angle)
+        self.__updateViewframe()

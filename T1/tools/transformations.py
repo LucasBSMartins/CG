@@ -42,5 +42,4 @@ class Transformations:
         for x, y in objeto.coord:
             new = np.matmul(np.array([x, y, 1]), transformation_matrix).tolist()
             new_coord.append([new[0], new[1]])
-        print(new_coord)
         return new_coord

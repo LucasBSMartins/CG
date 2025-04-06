@@ -2,7 +2,7 @@ from tools.windowControls import WindowControls
 from tools.objectEditor import ObjectEditor
 from screens.operations import Operations
 from screens.objectSelectionDialog import ObjectSelectionDialog
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtGui, QtCore
 from utils.wnr import Wnr
 from utils.logs import Logs
 from main_interface.window import Window
@@ -20,13 +20,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__console = None
         
         # Define tamanho fixo da janela, nome e cor
-        self.setFixedSize(800, 600)
+        self.setFixedSize(800, 610)
         self.setWindowTitle("SGI")
         self.setStyleSheet(f"{Settings.backgroundColor()};")
         
         self.__painter()
 
-        #MoveMonitor.center_on_second_monitor(self)
+        MoveMonitor.center_on_second_monitor(self)
 
     # Contrução de frames
     def __buildFrame(self, parent, x, y, w, h):
@@ -80,7 +80,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                          Settings.menu_frame()[2],
                                          Settings.menu_frame()[3])
         
-        self.__console_frame = self.__buildFrame(self, 250, 490, 530, 90)
+        self.__console_frame = self.__buildFrame(self, 250, 500, 530, 90)
         
         self.__view_frame = self.__buildFrame(self, Settings.canvas()[0],
                                          Settings.canvas()[1],
@@ -119,29 +119,52 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Criando lista de objetos
         self.__object_list = QtWidgets.QListWidget(self.__objects_frame)
-        self.__object_list.setGeometry(5, 10, 190, 150)
+        self.__object_list.setGeometry(5, 5, 190, 150)
         self.__object_list.setStyleSheet("background-color: white; color: black; border: 1px solid black;")
     
         # Criando sistema de logs
         log_message_func = self.__log_message
         self.__logs = Logs(log_message_func, self.__object_list)
+        toolbar = QtWidgets.QToolBar("Main Menu")
+        toolbar.setMovable(False)
+        self.addToolBar(QtCore.Qt.TopToolBarArea, toolbar)
 
+        menu = QtWidgets.QMenu("Options", self)
+        import_action = QtGui.QAction("Import", self)
+        export_action = QtGui.QAction("Export", self)
+        menu.addAction(import_action)
+        menu.addAction(export_action)
+
+        menu.setStyleSheet(Settings.menuStyleSheet())
+
+        # Connect the actions in the menu to their respective functions
+        #import_action.triggered.connect(self.handle_import)  # Replace self.handle_import with your function
+       # export_action.triggered.connect(self.handle_export)
+
+        menu_action = QtGui.QAction("Options", self)
+        menu_action.setMenu(menu)
+        menu_button = QtWidgets.QToolButton()
+        menu_button.setDefaultAction(menu_action)
+        menu_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        toolbar.addWidget(menu_button)
+
+        toolbar.setIconSize(QtCore.QSize(16, 16))
+        toolbar.setStyleSheet("QToolBar { spacing: 4px; padding: 2px; }")
+        toolbar.setFixedHeight(20)
+        menu_button.setFixedSize(60, 20)
+        menu_button.setStyleSheet(Settings.menuButtonStyleSheet())
         # ///////////////// ////////////////////// //////////////////////
 
         # ///////////////// Gerando labels //////////////////////
-        self.__messages_label = QtWidgets.QLabel(f"A WINDOW ESTÁ EM X: {self.__window.xw_min} a {self.__window.xw_max}   Y: {self.__window.yw_min} a {self.__window.yw_max}", self.__view_frame)
-        self.__messages_label.setStyleSheet("color: black; border: true;")
-        self.__messages_label.setWordWrap(True)
-        self.__messages_label.setGeometry(10, 440, 500, 15)
-               
+              
         self.__viewport_label = self.__buildText("  VIEWPORT", self.__view_frame,
-                                          Settings.canvas()[0] - 235, Settings.canvas()[1] - 25, 70, 20)
+                                          Settings.canvas()[0] - 235, Settings.canvas()[1] - 35, 70, 20)
 
         self.__menu_label = self.__buildText("   MENU DE FUNÇÕES", self.__menu_frame,
-                                           10, Settings.menu_frame()[1] - 25, 125, 20)
+                                           10, Settings.menu_frame()[1] - 35, 125, 20)
         
         self.__objects_label = self.__buildText(" OBJETOS", self.__menu_frame,
-                                           15, Settings.objects_frame()[1] - 10, 60, 20)
+                                           15, Settings.objects_frame()[1] - 15, 60, 20)
         
         self.__objects_label = self.__buildText(" WINDOW", self.__menu_frame,
                                            25, Settings.control_frame()[1] - 10, 60, 20)
@@ -183,14 +206,31 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__right_button = self.__createControlFrameButton("→", lambda: window_controls.move_right(), "Mover window para direita")
         self.__right_button.setGeometry(120, 145, 40, 40)
 
+        # Campo para definir o ângulo de rotação
+        self.__rotation_spinbox = QtWidgets.QDoubleSpinBox(self.__control_frame)
+        self.__rotation_spinbox.setGeometry(60, 210, 70, 35)
+        self.__rotation_spinbox.setRange(-360.0, 360.0)
+        self.__rotation_spinbox.setSingleStep(5.0)
+        self.__rotation_spinbox.setSuffix("°")
+        self.__rotation_spinbox.setValue(15.0)
+        self.__rotation_spinbox.setStyleSheet("background-color: white")
+
+        # Botão de rotação anti-horária
+        self.__rotate_ccw_button = self.__createControlFrameButton("⟲", lambda: window_controls.rotate_window(-self.__rotation_spinbox.value()), "Rotacionar anti-horário")
+        self.__rotate_ccw_button.setGeometry(10, 210, 40, 35)
+
+        # Botão de rotação horária
+        self.__rotate_cw_button = self.__createControlFrameButton("⟳", lambda: window_controls.rotate_window(self.__rotation_spinbox.value()), "Rotacionar horário")
+        self.__rotate_cw_button.setGeometry(140, 210, 40, 35)
+        font = QtGui.QFont()
+        font.setPointSize(15)
+
+        self.__rotate_ccw_button.setFont(font)
+        self.__rotate_cw_button.setFont(font)
         # ///////////////// ////////////////////// //////////////////////
 
     # Método para atualizar a exibição da janela
     def __updateViewframe(self):
-        self.__messages_label.setText(
-                f"A WINDOW ESTÁ EM X: {self.__window.xw_min:.2f} a {self.__window.xw_max:.2f}   "
-                f"Y: {self.__window.yw_min:.2f} a {self.__window.yw_max:.2f}"
-            )   
         self.__viewport.drawViewportObj(self.__display_file.objects_list)
 
     # Método para exibir mensagens no console
@@ -257,3 +297,11 @@ class MainWindow(QtWidgets.QMainWindow):
         update_view_func = self.__updateViewframe
         object_editor = ObjectEditor(object_list, display_file, log_message_func, update_view_func)
         object_editor.edit_object()
+
+    def __create_options_menu(self):
+        menu = QtWidgets.QMenu(self)
+        import_action = QtGui.QAction("Import", self)
+        export_action = QtGui.QAction("Export", self)
+        menu.addAction(import_action)
+        menu.addAction(export_action)
+        return menu

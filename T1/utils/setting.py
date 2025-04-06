@@ -3,7 +3,7 @@ class Settings():
     # Geometria da viewport
     @staticmethod
     def viewport():
-        return (15, 20, 500, 420)
+        return (15, 30, 500, 420)
     
     # x min da viewport
     @staticmethod
@@ -27,9 +27,9 @@ class Settings():
     
     @staticmethod
     def canvas():
-        return( 250, 20, 530, 460)
+        return( 250, 30, 530, 460)
     
-        # x max inicial da window
+    # x max inicial da window
     @staticmethod
     def windowXmax():
         return 1000
@@ -62,26 +62,74 @@ class Settings():
     # Geometria do frame de ferramentas
     @staticmethod
     def menu_frame():
-        return (20, 20, 220, 560)
+        return (20, 30, 220, 560)
     
     # Geometria do frame de objetos
     @staticmethod
     def objects_frame():
-        return (10, 25, 200, 165)
+        return (10, 35, 200, 165)
     
     # Geometria do frame de botoes
     @staticmethod
     def buttons_frame():
-        return (15, 190, 190, 60)   
+        return (15, 200, 190, 60)   
 
     # Geometria do frame de controle
     @staticmethod
     def control_frame():
-        return (15, 230, 190, 315)
+        return (15, 240, 190, 315)
     
     @staticmethod
     def backgroundColor():
         return "background-color: rgb(211,211,211)"
+
+    @staticmethod
+    def menuStyleSheet():
+        return """QMenu {
+                background-color: rgb(240, 240, 240); /* Light background for the menu */
+                border: none; /* Remove the outer border */
+                margin: 2px;
+            }
+
+            QMenu::item {
+                background-color: transparent;
+                padding: 5px 20px;
+                color: black;
+            }
+
+            QMenu::item:selected {
+                background-color: rgb(170, 170, 170); /* Darker background on hover */
+                color: white;
+            }
+
+            QMenu::separator {
+                height: 1px;
+                background: #c0c0c0; /* Color of the separator line */
+                margin: 5px 0; /* Add some spacing above and below the line */
+            }"""
+    
+    @staticmethod
+    def menuButtonStyleSheet():
+        return """
+            QToolButton {
+                background-color: rgb(211, 211, 211); /* Light gray background */
+                color: black; /* Default text color */
+                border: 1px solid #a1a1a1;
+                border-radius: 2px;
+                padding: 2px;
+                font-size: 10px;
+            }
+            QToolButton::menu-indicator { image: none; }
+            QToolButton:hover {
+                background-color: rgb(100, 100, 100); /* Darker on hover */
+                color: white; /* Change text color on hover */
+                border: 1px solid #777777;
+            }
+            QToolButton:pressed {
+                background-color: rgb(60, 60, 60); /* Even darker when pressed */
+                color: white; /* Change text color on press */
+            }
+        """
 
 from enum import Enum
    
