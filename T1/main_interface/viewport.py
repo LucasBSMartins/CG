@@ -40,7 +40,7 @@ class Viewport(QLabel):
             obj.draw(coord_viewport, painter)
         
         self.setPixmap(self.__pix_map)
-    
+
     # Normalizar coordenadas
     def __normalizeCoords(self, obj_list):
         transforming_matrix = self.__window.windowNormalize()

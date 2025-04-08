@@ -66,6 +66,7 @@ class Window:
         self.__move(dx, dy)
 
      # Rotação da window
+    
     def rotate(self, theta):
         self.__view_up_vector = self.__rotatePoint(self.__view_up_vector, theta)
         self.__updateEdges(theta)
@@ -94,6 +95,7 @@ class Window:
         self.__edges = new_edges
 
         # Rotaciona um ponto por um ângulo
+    
     def __rotatePoint(self, point, angle):
         rotation_matrix = MatrixGenerator.generateRotationMatrix(angle)
         result = np.matmul(np.array([point[0], point[1], 1]), rotation_matrix).tolist()[0:2]

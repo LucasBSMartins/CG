@@ -31,7 +31,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.__painter()
 
-       # MoveMonitor.center_on_second_monitor(self)
+        #MoveMonitor.center_on_second_monitor(self)
 
     # Contrução de frames
     def __buildFrame(self, parent, x, y, w, h):
@@ -140,12 +140,13 @@ class MainWindow(QtWidgets.QMainWindow):
         center_action = QtGui.QAction("Center", self)
         menu.addAction(import_action)
         menu.addAction(export_action)
-        menu.addAction(center_action)
+        #menu.addAction(center_action)
 
         menu.setStyleSheet(Settings.menuStyleSheet())
 
         import_action.triggered.connect(self.__importFile)
         export_action.triggered.connect(self.__exportFile)
+        #center_action.triggered.connect(self.__window.center_and_reset_rotation() and self.__updateViewframe)
 
         menu_action = QtGui.QAction("Options", self)
         menu_action.setMenu(menu)
