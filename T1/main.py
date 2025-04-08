@@ -1,8 +1,8 @@
 import sys
 from main_interface.mainWindow import MainWindow
 from PySide6.QtWidgets import QApplication
-# Código comentado para gerar SIG que se atualiza com a construção do código 
 
+'''
 def run_app():
     app = QApplication(sys.argv)
     window = MainWindow()
@@ -19,5 +19,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-
-'''
