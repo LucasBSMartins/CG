@@ -3,10 +3,11 @@ from tools.objectTransformator import ObjectTransformator
 from utils.setting import Settings
 
 class TranslationDialog(QDialog):
-    def __init__(self, displayFile, objectList):
+    def __init__(self, displayFile, objectList, window):
         super().__init__()
         self.__displayFile = displayFile
         self.__objectList = objectList
+        self.__window = window
         self.setWindowTitle("Translação")
         self.resize(100, 100)
 
@@ -41,7 +42,7 @@ class TranslationDialog(QDialog):
         selected_item_text = selected_item.text()
         object_name = selected_item_text.split(' (')[0]
         selected_object = self.__displayFile.get_object(object_name)
-        transformator = ObjectTransformator(selected_object)
+        transformator = ObjectTransformator(selected_object, self.__window)
         transformator.translateObject(dx, dy)
 
         self.accept()

@@ -132,14 +132,15 @@ class MainWindow(QtWidgets.QMainWindow):
         menu = QtWidgets.QMenu("Options", self)
         import_action = QtGui.QAction("Import", self)
         export_action = QtGui.QAction("Export", self)
+        center_action = QtGui.QAction("Center", self)
         menu.addAction(import_action)
         menu.addAction(export_action)
+        menu.addAction(center_action)
 
         menu.setStyleSheet(Settings.menuStyleSheet())
 
-        # Connect the actions in the menu to their respective functions
-        #import_action.triggered.connect(self.handle_import)  # Replace self.handle_import with your function
-       # export_action.triggered.connect(self.handle_export)
+        #import_action.triggered.connect(self.handle_import)
+        #export_action.triggered.connect(self.handle_export)
 
         menu_action = QtGui.QAction("Options", self)
         menu_action.setMenu(menu)
@@ -248,7 +249,6 @@ class MainWindow(QtWidgets.QMainWindow):
     
     # Método para escolher uma operação sobre um objeto selecionado
     def __choose_operation(self):
-
         selected_index = self.__object_list.currentRow()
         if selected_index == -1:
             Wnr.show_selection_error()
@@ -257,7 +257,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Método que executa a operação escolhida sobre um objeto
     def __perform_selected_operation(self, selected_index):
-
         object_name = self.__object_list.item(selected_index).text()
         operations = Operations(object_name)
         if operations.exec() == QtWidgets.QDialog.DialogCode.Accepted:
@@ -274,8 +273,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__transformObject()
 
     def __transformObject(self):
-        
-        transform_dialog = TransformObjectDialog(self.__display_file, self.__object_list)
+        transform_dialog = TransformObjectDialog(self.__display_file, self.__object_list, self.__window)
         transform_dialog.exec()
         self.__updateViewframe()
 
@@ -297,11 +295,3 @@ class MainWindow(QtWidgets.QMainWindow):
         update_view_func = self.__updateViewframe
         object_editor = ObjectEditor(object_list, display_file, log_message_func, update_view_func)
         object_editor.edit_object()
-
-    def __create_options_menu(self):
-        menu = QtWidgets.QMenu(self)
-        import_action = QtGui.QAction("Import", self)
-        export_action = QtGui.QAction("Export", self)
-        menu.addAction(import_action)
-        menu.addAction(export_action)
-        return menu

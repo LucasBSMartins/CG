@@ -69,7 +69,7 @@ class Window:
     def rotate(self, theta):
         self.__view_up_vector = self.__rotatePoint(self.__view_up_vector, theta)
         self.__updateEdges(theta)
-
+        
     # Função chamada por todas as movimentações para fazer a movimentação efetiva da window
     def __move(self, dx, dy):
         translation_matrix = MatrixGenerator.generateTranslationMatrix(dx, dy)

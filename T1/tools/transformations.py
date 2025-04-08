@@ -2,11 +2,19 @@ import numpy as np
 from tools.matrixGenerator import MatrixGenerator as MG
 
 class Transformations:
-    def __init__(self):
+    def __init__(self, window=None):
         self.__mg = MG()
+        if window:
+            self.__window = window
 
     def translation(self, objeto, dx, dy):
-        matriz_reposicionamento = self.__mg.generateTranslationMatrix(dx, dy)
+        np_viewup = np.array(self.__window.view_up_vector)
+        angle = np.degrees(np.arctan2(np_viewup[0], np_viewup[1]))
+
+        rotation = self.__mg.generateRotationMatrix(-angle)
+        translating_matrix = self.__mg.generateTranslationMatrix(dx, dy)
+        rotation_back = self.__mg.generateRotationMatrix(angle)
+        matriz_reposicionamento = np.matmul(np.matmul(rotation, translating_matrix), rotation_back)
         return self._apply_transformation(objeto, matriz_reposicionamento)
     
     def rotateAroundObjectCenter(self, objeto, theta):
@@ -34,7 +42,13 @@ class Transformations:
         return self._apply_transformation(objeto, matriz_reposicionamento)
 
     def scaling(self, objeto, sx, sy):
-        matriz_reposicionamento = self.__mg.generateScalingMatrix(sx, sy)
+        center_coord = objeto.getCenter()
+
+        translating = self.__mg.generateTranslationMatrix(-center_coord[0], -center_coord[1])
+        scaling = self.__mg.generateScalingMatrix(sx, sy)
+        translating_back = self.__mg.generateTranslationMatrix(center_coord[0], center_coord[1])
+
+        matriz_reposicionamento = np.matmul(np.matmul(translating, scaling), translating_back)
         return self._apply_transformation(objeto, matriz_reposicionamento)
 
     def _apply_transformation(self, objeto, transformation_matrix):

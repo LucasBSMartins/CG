@@ -2,9 +2,12 @@ import numpy as np
 from tools.transformations import Transformations
 
 class ObjectTransformator:
-    def __init__(self, selected_obj):
+    def __init__(self, selected_obj, window = None):
         self.__selected_obj = selected_obj
-        self.__transformator = Transformations()
+        if window:
+            self.__transformator = Transformations(window)
+        else:
+            self.__transformator = Transformations()
 
     def translateObject(self, dx, dy):
         self.__selected_obj.coord = self.__transformator.translation(self.__selected_obj, dx, dy)

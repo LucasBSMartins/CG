@@ -6,10 +6,11 @@ from screens.rotationDialog import RotationDialog
 
 class TransformObjectDialog(QtWidgets.QDialog):
     """Janela inicial para escolher o tipo de objeto."""
-    def __init__(self, displayFile, objectList):
+    def __init__(self, displayFile, objectList, window):
         super().__init__()
         self.__displayFile = displayFile
         self.__objectList = objectList
+        self.__window = window
         self.setWindowTitle("Transformações")
         self.resize(100, 100)
 
@@ -34,7 +35,7 @@ class TransformObjectDialog(QtWidgets.QDialog):
         self.accept()
 
         if self.selected_object == "Translação":
-            self.__translationDialog = TranslationDialog( self.__displayFile, self.__objectList)
+            self.__translationDialog = TranslationDialog( self.__displayFile, self.__objectList, self.__window)
             self.__translationDialog.exec()
 
         elif self.selected_object == "Escalonamento":
