@@ -1,10 +1,15 @@
 from tools.windowControls import WindowControls
 from tools.objectEditor import ObjectEditor
 from screens.operations import Operations
+from tools.reader import ReaderOBJ
+from tools.exporter import GenerateOBJ
 from screens.objectSelectionDialog import ObjectSelectionDialog
 from PySide6 import QtWidgets, QtGui, QtCore
 from utils.wnr import Wnr
 from utils.logs import Logs
+from objects.line import Line
+from objects.point import Point
+from objects.wireframe import Wireframe 
 from main_interface.window import Window
 from main_interface.viewport import Viewport
 from main_interface.displayFile import DisplayFile
@@ -26,7 +31,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.__painter()
 
-        MoveMonitor.center_on_second_monitor(self)
+       # MoveMonitor.center_on_second_monitor(self)
 
     # Contrução de frames
     def __buildFrame(self, parent, x, y, w, h):
@@ -139,8 +144,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         menu.setStyleSheet(Settings.menuStyleSheet())
 
-        #import_action.triggered.connect(self.handle_import)
-        #export_action.triggered.connect(self.handle_export)
+        import_action.triggered.connect(self.__importFile)
+        export_action.triggered.connect(self.__exportFile)
 
         menu_action = QtGui.QAction("Options", self)
         menu_action.setMenu(menu)
@@ -277,6 +282,36 @@ class MainWindow(QtWidgets.QMainWindow):
         transform_dialog.exec()
         self.__updateViewframe()
 
+    def __exportFile(self):
+        filename = QtWidgets.QFileDialog.getSaveFileName(caption="File to export", filter="Wavefront files (*.obj)")
+        
+        if filename[0] == '':
+            return
+        
+        generator = GenerateOBJ(self.__display_file)
+        generator.generateFileObj(filename[0])
+
+    def __importFile(self):
+        file_dialog = QtWidgets.QFileDialog()
+        filepath = file_dialog.getOpenFileName(caption="Open Image", filter="Wavefront files (*.obj)")
+        
+        if filepath[0] == '':
+            return
+
+        reader =  ReaderOBJ()
+        reader.openFile(filepath[0])
+        
+        for obj in reader.objects:
+            self.__display_file.addObject(obj)
+            if isinstance(obj, Point):
+                self.__object_list.addItem(str(obj.name) + " (Ponto)")
+            elif isinstance(obj, Line):
+                self.__object_list.addItem(str(obj.name) + " (Reta)")
+            elif isinstance(obj, Wireframe):
+                self.__object_list.addItem(str(obj.name) + " (Polígono)")
+
+        self.__updateViewframe()
+    
     # Método para deletar um objeto selecionado
     def __deleteObject(self):
 

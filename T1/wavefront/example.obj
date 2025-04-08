@@ -1,0 +1,21 @@
+mtllib example.mtl
+
+o MyPoint
+p 1
+
+o MyLine
+usemtl Green
+l 2 3
+
+o Quadrado
+usemtl Blue
+l 4 5 6 7
+
+# Vertex coordinates
+v 1.0 2.0 0.0
+v 3.0 2.0 0.0
+v 3.0 4000.0 0.0
+v 0.0 0.0 0.0
+v 0.0 1000.0 0.0
+v 1000.0 1000.0 0.0
+v 1000.0 0.0 0.0

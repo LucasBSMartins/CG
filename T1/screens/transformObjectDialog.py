@@ -35,13 +35,13 @@ class TransformObjectDialog(QtWidgets.QDialog):
         self.accept()
 
         if self.selected_object == "Translação":
-            self.__translationDialog = TranslationDialog( self.__displayFile, self.__objectList, self.__window)
+            self.__translationDialog = TranslationDialog(self.__displayFile, self.__objectList, self.__window)
             self.__translationDialog.exec()
 
         elif self.selected_object == "Escalonamento":
-            self.__escalonamentoDialog = EscalonamentoDialog( self.__displayFile, self.__objectList)
+            self.__escalonamentoDialog = EscalonamentoDialog(self.__displayFile, self.__objectList)
             self.__escalonamentoDialog.exec()
 
         elif self.selected_object == "Rotação":
-            self.__rotacaoDialog = RotationDialog( self.__displayFile, self.__objectList)
+            self.__rotacaoDialog = RotationDialog(self.__displayFile, self.__objectList)
             self.__rotacaoDialog.exec()

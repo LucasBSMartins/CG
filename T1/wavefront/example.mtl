@@ -1,0 +1,11 @@
+# Material definition for the blue triangle
+
+newmtl Blue
+Kd 0.0 0.0 1.0 
+Ks 0.5 0.5 0.5
+Ns 10.0
+
+newmtl Green
+Kd 0.0 1.0 0.0 
+Ks 0.5 0.5 0.5  
+Ns 10.0   
