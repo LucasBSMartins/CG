@@ -55,6 +55,8 @@ class AddObjectDialog(QtWidgets.QDialog):
 
             self.x_input.setMaximum(1000000000)
             self.y_input.setMaximum(1000000000)
+            self.x_input.setMinimum(-1000000000)
+            self.y_input.setMinimum(-1000000000)
             self.x_input.setDecimals(0)
             self.y_input.setDecimals(0) 
             
@@ -69,6 +71,8 @@ class AddObjectDialog(QtWidgets.QDialog):
             self.y1_input = QtWidgets.QDoubleSpinBox(self)
             self.x1_input.setMaximum(1000000000)  
             self.y1_input.setMaximum(1000000000)
+            self.x1_input.setMinimum(-1000000000)
+            self.y1_input.setMinimum(-1000000000)
             self.x1_input.setDecimals(0)  
             self.y1_input.setDecimals(0)  
             
@@ -82,6 +86,8 @@ class AddObjectDialog(QtWidgets.QDialog):
             self.y2_input = QtWidgets.QDoubleSpinBox(self)
             self.x2_input.setMaximum(1000000000) 
             self.y2_input.setMaximum(1000000000)
+            self.x2_input.setMinimum(-1000000000)
+            self.y2_input.setMinimum(-1000000000)
             self.x2_input.setDecimals(0)  
             self.y2_input.setDecimals(0)  
             
@@ -120,6 +126,8 @@ class AddObjectDialog(QtWidgets.QDialog):
 
             x_input.setMaximum(1000000000)  
             y_input.setMaximum(1000000000)
+            x_input.setMinimum(-1000000000)  
+            y_input.setMinimum(-1000000000)  
             x_input.setDecimals(0)  
             y_input.setDecimals(0)
 
@@ -152,7 +160,6 @@ class AddObjectDialog(QtWidgets.QDialog):
                 return False
 
         selected_color = self.color_picker.get_selected_color()
-        print(selected_color)
         if self.selected_object == "Ponto":
             x = self.x_input.text().strip()
             y = self.y_input.text().strip()

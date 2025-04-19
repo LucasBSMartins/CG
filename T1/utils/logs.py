@@ -36,7 +36,7 @@ class Logs:
         if side == "left":
             self.__log_message(f"Window foi movida pra esquerda em {scale}%.")
 
-        elif side == "rigth":
+        elif side == "right":
             self.__log_message(f"Window foi movida pra direita em {scale}%.")
 
         elif side == "up":
@@ -52,4 +52,4 @@ class Logs:
         self.__log_message(f"Zoom Out de {scale}% aplicado.")
 
     def logWindowRotation(self, scale):
-        self.__log_message(f"Rotação de {scale}% aplicada na window.")
+        self.__log_message(f"Rotação de {scale} aplicada na window.")

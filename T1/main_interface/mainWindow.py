@@ -1,4 +1,3 @@
-from tools.windowControls import WindowControls
 from tools.objectEditor import ObjectEditor
 from screens.operations import Operations
 from tools.reader import ReaderOBJ
@@ -13,8 +12,9 @@ from objects.wireframe import Wireframe
 from main_interface.window import Window
 from main_interface.viewport import Viewport
 from main_interface.displayFile import DisplayFile
-from utils.setting import Settings
+from utils.setting import Settings, ClippingAlgorithm
 from utils.moveToSecondMonitor import MoveMonitor
+from main_interface.canvas import Canvas
 from screens.transformObjectDialog import TransformObjectDialog
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -31,7 +31,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.__painter()
 
-        #MoveMonitor.center_on_second_monitor(self)
+        MoveMonitor.center_on_second_monitor(self)
 
     # Contrução de frames
     def __buildFrame(self, parent, x, y, w, h):
@@ -75,6 +75,13 @@ class MainWindow(QtWidgets.QMainWindow):
          
         return button
 
+    def __createControlFrameRadioButton(self, text, algorithm, x, y, width, height):
+        radio_button = QtWidgets.QRadioButton(text, self.__clipping_frame)
+        radio_button.setGeometry(x, y, width, height)
+        radio_button.algorithm = algorithm  # Store the algorithm
+        radio_button.setStyleSheet("color: black;")
+        return radio_button
+   
     def  __painter(self):
         
         # ///////////////// Gerando delimitações de área //////////////////////
@@ -87,10 +94,10 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.__console_frame = self.__buildFrame(self, 250, 500, 530, 90)
         
-        self.__view_frame = self.__buildFrame(self, Settings.canvas()[0],
-                                         Settings.canvas()[1],
-                                         Settings.canvas()[2],
-                                         Settings.canvas()[3])
+        self.__view_frame = self.__buildFrame(self, Settings.view_frame()[0],
+                                         Settings.view_frame()[1],
+                                         Settings.view_frame()[2],
+                                         Settings.view_frame()[3])
 
         self.__objects_frame = self.__buildFrame(self.__menu_frame, Settings.objects_frame()[0],
                                          Settings.objects_frame()[1],
@@ -109,6 +116,11 @@ class MainWindow(QtWidgets.QMainWindow):
                                                     Settings.control_frame()[2],
                                                     Settings.control_frame()[3])
         
+        self.__clipping_frame= self.__buildFrame(self.__menu_frame, Settings.clipping_frame()[0],
+                                                    Settings.clipping_frame()[1],
+                                                    Settings.clipping_frame()[2],
+                                                    Settings.clipping_frame()[3])
+
         # ///////////////// ////////////////////// //////////////////////
 
         # ///////////////// Coisas que usamos //////////////////////
@@ -120,7 +132,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__console.setGeometry(5, 5, 520, 80)
 
         #Criando viewport
-        self.__viewport = Viewport(self.__view_frame, self.__window)  
+        self.__viewport = Viewport(self.__window)
+
+        self.__canvas = Canvas(self.__view_frame, self.__viewport)  
 
         # Criando lista de objetos
         self.__object_list = QtWidgets.QListWidget(self.__objects_frame)
@@ -137,7 +151,7 @@ class MainWindow(QtWidgets.QMainWindow):
         menu = QtWidgets.QMenu("Options", self)
         import_action = QtGui.QAction("Import", self)
         export_action = QtGui.QAction("Export", self)
-        center_action = QtGui.QAction("Center", self)
+        #center_action = QtGui.QAction("Center", self)
         menu.addAction(import_action)
         menu.addAction(export_action)
         #menu.addAction(center_action)
@@ -165,7 +179,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # ///////////////// Gerando labels //////////////////////
               
         self.__viewport_label = self.__buildText("  VIEWPORT", self.__view_frame,
-                                          Settings.canvas()[0] - 235, Settings.canvas()[1] - 35, 70, 20)
+                                           10, Settings.view_frame()[1] - 36, 70, 20)
 
         self.__menu_label = self.__buildText("   MENU DE FUNÇÕES", self.__menu_frame,
                                            10, Settings.menu_frame()[1] - 35, 125, 20)
@@ -173,12 +187,33 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__objects_label = self.__buildText(" OBJETOS", self.__menu_frame,
                                            15, Settings.objects_frame()[1] - 15, 60, 20)
         
-        self.__objects_label = self.__buildText(" WINDOW", self.__menu_frame,
-                                           25, Settings.control_frame()[1] - 10, 60, 20)
+        self.__objects_label = self.__buildText(" CONTROLES", self.__menu_frame,
+                                           25, Settings.control_frame()[1] - 10, 75, 20)
+        
+        self.__clipping_label = self.__buildText(" CLIPAGEM", self.__menu_frame,
+                                           25, Settings.clipping_frame()[1] - 10, 60, 18)
 
         # ///////////////// ////////////////////// //////////////////////
 
         # ///////////////// Gerando botões //////////////////////
+
+        # Clipping Algorithm Radio Buttons
+        self.__clipping_group = QtWidgets.QButtonGroup(self.__clipping_frame)
+
+        self.__cohen_sutherland_radio = self.__createControlFrameRadioButton(
+            "Cohen-Sutherland", ClippingAlgorithm.COHEN, 5, 5, 180, 20
+        )
+        self.__liang_barsky_radio = self.__createControlFrameRadioButton(
+            "Liang-Barsky", ClippingAlgorithm.LIANG, 5, 25, 180, 20
+        )
+
+        self.__clipping_group.addButton(self.__cohen_sutherland_radio)
+        self.__clipping_group.addButton(self.__liang_barsky_radio)
+
+        self.__cohen_sutherland_radio.setChecked(True)  # Default selection
+        self.__clipping_algorithm = ClippingAlgorithm.COHEN  # Initialize the algorithm
+
+        self.__clipping_group.buttonClicked.connect(self.__update_clipping_algorithm)
 
         # Botões objetos
         self.__add_button = self.__createObjectFrameButton('ADICIONAR', lambda: self.__add_object())
@@ -197,20 +232,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__scaleSpinBox.setValue(10.0)
         self.__scaleSpinBox.setStyleSheet("background-color: white")
 
-        window_controls = WindowControls(self.__window, self.__scaleSpinBox, self.__logs, self.__updateViewframe)
-
-        self.__zoom_in_button = self.__createControlFrameButton("ZOOM +", lambda: window_controls.zoom_in(), "Zoom in")
+        self.__zoom_in_button = self.__createControlFrameButton("ZOOM +", lambda: self.__zoom("in"), "Zoom in")
         self.__zoom_in_button.setGeometry(100, 15, 80, 25)
-        self.__zoom_out_button = self.__createControlFrameButton("ZOOM -", lambda: window_controls.zoom_out(), "Zoom out")
+        self.__zoom_out_button = self.__createControlFrameButton("ZOOM -", lambda: self.__zoom("out"), "Zoom out")
         self.__zoom_out_button.setGeometry(100, 45, 80, 25)
 
-        self.__up_button = self.__createControlFrameButton("↑", lambda: window_controls.move_up(), "Mover window para cima")
+        self.__up_button = self.__createControlFrameButton("↑", lambda: self.__move_window("up"), "Mover window para cima")
         self.__up_button.setGeometry(75, 100, 40, 40)
-        self.__down_button = self.__createControlFrameButton("↓", lambda: window_controls.move_down(), "Mover window para baixo" )
+        self.__down_button = self.__createControlFrameButton("↓", lambda: self.__move_window("down"), "Mover window para baixo" )
         self.__down_button.setGeometry(75, 145, 40, 40)
-        self.__left_button = self.__createControlFrameButton("←", lambda: window_controls.move_left(), "Mover window para esquerda")
+        self.__left_button = self.__createControlFrameButton("←", lambda: self.__move_window("left"), "Mover window para esquerda")
         self.__left_button.setGeometry(30, 145, 40, 40)
-        self.__right_button = self.__createControlFrameButton("→", lambda: window_controls.move_right(), "Mover window para direita")
+        self.__right_button = self.__createControlFrameButton("→", lambda: self.__move_window("right"), "Mover window para direita")
         self.__right_button.setGeometry(120, 145, 40, 40)
 
         # Campo para definir o ângulo de rotação
@@ -223,22 +256,47 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__rotation_spinbox.setStyleSheet("background-color: white")
 
         # Botão de rotação anti-horária
-        self.__rotate_ccw_button = self.__createControlFrameButton("⟲", lambda: window_controls.rotate_window(-self.__rotation_spinbox.value()), "Rotacionar anti-horário")
+        self.__rotate_ccw_button = self.__createControlFrameButton("⟲", lambda: self.__rotate_window(-self.__rotation_spinbox.value()), "Rotacionar anti-horário")
         self.__rotate_ccw_button.setGeometry(10, 210, 40, 35)
 
         # Botão de rotação horária
-        self.__rotate_cw_button = self.__createControlFrameButton("⟳", lambda: window_controls.rotate_window(self.__rotation_spinbox.value()), "Rotacionar horário")
+        self.__rotate_cw_button = self.__createControlFrameButton("⟳", lambda: self.__rotate_window(self.__rotation_spinbox.value()), "Rotacionar horário")
         self.__rotate_cw_button.setGeometry(140, 210, 40, 35)
         font = QtGui.QFont()
         font.setPointSize(15)
 
         self.__rotate_ccw_button.setFont(font)
         self.__rotate_cw_button.setFont(font)
+        self.__updateViewframe()
+
         # ///////////////// ////////////////////// //////////////////////
 
     # Método para atualizar a exibição da janela
     def __updateViewframe(self):
-        self.__viewport.drawViewportObj(self.__display_file.objects_list)
+        self.__canvas.drawObjects(self.__display_file.objects_list, self.__clipping_algorithm, self.__window)
+  
+    def __move_window(self, direction):
+        self.__window.move_direction(direction, self.__scaleSpinBox.value())
+        self.__logs.logWindowMovidaPara(direction, self.__scaleSpinBox.value())
+        self.__updateViewframe()
+
+    def __zoom(self, direction):
+        if direction == "in":
+            self.__window.zoomIn(self.__scaleSpinBox.value())
+            self.__logs.logZoomIn(self.__scaleSpinBox.value())
+        elif direction == "out":
+            self.__window.zoomOut(self.__scaleSpinBox.value())
+            self.__logs.logZoomOut(self.__scaleSpinBox.value())
+        self.__updateViewframe()
+
+    def __rotate_window(self, angle):
+        self.__window.rotate(angle)
+        self.__logs.logWindowRotation(angle)
+        self.__updateViewframe()
+
+    def __update_clipping_algorithm(self, radio_button):
+        self.__clipping_algorithm = radio_button.algorithm
+        self.__updateViewframe()
 
     # Método para exibir mensagens no console
     def __log_message(self, message):

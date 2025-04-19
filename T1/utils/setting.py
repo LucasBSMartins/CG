@@ -3,7 +3,15 @@ class Settings():
     # Geometria da viewport
     @staticmethod
     def viewport():
-        return (15, 30, 500, 420)
+        return (15, 15, 470, 400)
+    
+    @staticmethod
+    def view_frame():
+        return (250, 30, 530, 460)
+    
+    @staticmethod
+    def canvas():
+        return(15, 15, 500, 430)
     
     # x min da viewport
     @staticmethod
@@ -23,17 +31,8 @@ class Settings():
     # y max da viewport
     @staticmethod
     def viewportYmax():
-        return Settings.viewport()[1] + Settings.viewport()[3]
-    
-    @staticmethod
-    def canvas():
-        return( 250, 30, 530, 460)
-    
-    # x max inicial da window
-    @staticmethod
-    def windowXmax():
-        return 1000
-    
+        return Settings.viewport()[1] + Settings.viewport()[3]  
+      
     # Menor coordenada possível para x ou y do objeto
     @staticmethod
     def min_coord():
@@ -43,6 +42,11 @@ class Settings():
     @staticmethod
     def max_coord():
         return 1000000000
+    
+    # x max inicial da window
+    @staticmethod
+    def windowXmax():
+        return 1000
     
     # x min inicial da window
     @staticmethod
@@ -77,7 +81,13 @@ class Settings():
     # Geometria do frame de controle
     @staticmethod
     def control_frame():
-        return (15, 240, 190, 315)
+        return (15, 240, 190, 250)
+    
+    # Geometria do frame de controle
+    @staticmethod
+    def clipping_frame():
+        return (15, 500, 190, 50)
+    
     
     @staticmethod
     def backgroundColor():
@@ -142,3 +152,7 @@ class RotationType(Enum):
     OBJECT_CENTER = "Centro do objeto"
     WORLD_CENTER = "Centro do mundo"
     ARBITRARY_POINT = "Ponto Arbitrário"
+
+class ClippingAlgorithm(Enum):
+    COHEN = "Método de Cohen Sutherland"
+    LIANG = "Método de Liang-Barsky"

@@ -36,7 +36,6 @@ class GenerateOBJ:
 
             obj_file.write(f"mtllib {mtl_filename}\n\n")
 
-            print(self.objects.items())
             for name, data in self.objects.items():
                 obj_file.write(f"o {name}\n")
                 mtl_use = self._generateMTLFile(data["color"])
