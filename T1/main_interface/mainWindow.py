@@ -31,7 +31,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.__painter()
 
-        MoveMonitor.center_on_second_monitor(self)
+        #MoveMonitor.center_on_second_monitor(self)
 
     # Contrução de frames
     def __buildFrame(self, parent, x, y, w, h):
