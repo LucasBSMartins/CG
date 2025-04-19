@@ -12,7 +12,7 @@ class Clipping:
             else:
                 return Clipping.clip_line_liang_barsky(coordinates, viewing_window)
         elif object_type == Type.WIREFRAME:
-            return Clipping.clip_wireframe_sutherland_hodgeman(coordinates, viewing_window)
+            return Clipping.clip_wireframe_sutherlandHodgeman(coordinates, viewing_window)
 
     @staticmethod
     def clip_point(point_coords, window):
@@ -106,63 +106,45 @@ class Clipping:
         return True, [[new_x1, new_y1], [new_x2, new_y2]]
 
     @staticmethod
-    def clip_wireframe_sutherland_hodgeman(polygon_coords, window):
-        clipping_edges = [
-            (window.xmin_scn, window.ymin_scn, window.xmin_scn, window.ymax_scn),  # Left
-            (window.xmin_scn, window.ymax_scn, window.xmax_scn, window.ymax_scn),  # Top
-            (window.xmax_scn, window.ymax_scn, window.xmax_scn, window.ymin_scn),  # Right
-            (window.xmax_scn, window.ymin_scn, window.xmin_scn, window.ymin_scn)   # Bottom
-        ]
+    def clip_wireframe_sutherlandHodgeman(coords, window):
+        clipping_window = [[window.xmin_scn, window.ymin_scn],
+                       [window.xmin_scn, window.ymax_scn],
+                       [window.xmax_scn, window.ymax_scn],
+                       [window.xmax_scn, window.ymin_scn]]
 
-        clipped_polygon = list(polygon_coords)
+        clipped_coords = coords
+        for i in range(len(clipping_window)):
+            previous_coords = clipped_coords
+            clipped_coords = []
+            window_edge1 = clipping_window[i]
+            window_edge2 = clipping_window[(i+1)%len(clipping_window)]
 
-        for edge in clipping_edges:
-            new_polygon = []
-            x1_clip, y1_clip, x2_clip, y2_clip = edge
+            for j in range(len(previous_coords)):
+                current_point = previous_coords[j]
+                next_point = previous_coords[(j+1)%len(previous_coords)]
 
-            for i in range(len(clipped_polygon)):
-                current_point = clipped_polygon[i]
-                prev_point = clipped_polygon[i - 1] if i > 0 else clipped_polygon[-1]
+                current_inside = Clipping.is_inside_sh(current_point, window_edge1, window_edge2)
+                next_inside = Clipping.is_inside_sh(next_point, window_edge1, window_edge2)
+                
+                if next_inside:
+                    if not current_inside:
+                        clipped_coords.append(Clipping.get_intersection_sh(current_point, next_point, window_edge1, window_edge2))
+                    clipped_coords.append(next_point)
+                elif current_inside:
+                    clipped_coords.append(Clipping.get_intersection_sh(current_point, next_point, window_edge1, window_edge2))
 
-                current_inside = Clipping.is_inside_sh(current_point, edge)
-                prev_inside = Clipping.is_inside_sh(prev_point, edge)
-
-                if current_inside:
-                    if not prev_inside:
-                        intersection = Clipping. get_intersection_sh(prev_point, current_point, edge)
-                        new_polygon.append(intersection)
-                    new_polygon.append(current_point)
-                elif prev_inside:
-                    intersection = Clipping.get_intersection_sh(prev_point, current_point, edge)
-                    new_polygon.append(intersection)
-
-            clipped_polygon = new_polygon
-
-        if not clipped_polygon:
-            return False, polygon_coords
+        if len(clipped_coords) == 0:
+            return (False, coords)
         else:
-            return True, clipped_polygon
+            return (True, clipped_coords)
+   
+    @staticmethod
+    def is_inside_sh(point, edge1, edge2):
+            return ((edge2[0]-edge1[0]) * (point[1]-edge1[1])) < ((edge2[1]-edge1[1]) * (point[0]-edge1[0]))
 
     @staticmethod
-    def is_inside_sh(point, edge):
-        x_clip1, y_clip1, x_clip2, y_clip2 = edge
-        return (x_clip2 - x_clip1) * (point[1] - y_clip1) - (y_clip2 - y_clip1) * (point[0] - x_clip1) > 0
-
-    @staticmethod
-    def get_intersection_sh(p1, p2, edge):
-        x1, y1 = p1
-        x2, y2 = p2
-        x3, y3, x4, y4 = edge
-
-        denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
-        if denominator == 0:
-            return None  # Lines are parallel
-
-        t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denominator
-        u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denominator
-
-        if 0 <= t <= 1 and 0 <= u <= 1:
-            intersection_x = x1 + t * (x2 - x1)
-            intersection_y = y1 + t * (y2 - y1)
-            return (intersection_x, intersection_y)
-        return None
+    def get_intersection_sh(point1, point2, edge1, edge2):
+        numx = (edge1[0]*edge2[1] - edge1[1]*edge2[0])*(point1[0]-point2[0]) - (edge1[0]-edge2[0])*(point1[0]*point2[1]-point1[1]*point2[0])
+        den = (edge1[0]-edge2[0])*(point1[1]-point2[1]) - (edge1[1]-edge2[1])*(point1[0]-point2[0])
+        numy = (edge1[0]*edge2[1] - edge1[1]*edge2[0])*(point1[1]-point2[1]) - (edge1[1]-edge2[1])*(point1[0]*point2[1]-point1[1]*point2[0])
+        return (numx/den, numy/den)
