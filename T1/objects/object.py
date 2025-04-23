@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from math import sin, cos
+import numpy as np
 
 class Object(ABC):
     # Classe abstrata de objeto, que será estendida no código 
@@ -13,6 +13,15 @@ class Object(ABC):
     @abstractmethod
     def draw(self, transformed_coord, painter):
         pass
+    
+    def normalizeCoords(self, window):
+        transforming_matrix = window.windowNormalize()
+
+        normalized_coords = []
+        for x, y in self.coord:
+            transformed_coord = (np.dot(np.array([x, y, 1]), np.array(transforming_matrix))).tolist()
+            normalized_coords.append(transformed_coord[:2])
+        return normalized_coords
 
     @property
     def name(self):

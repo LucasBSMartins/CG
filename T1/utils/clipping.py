@@ -1,19 +1,5 @@
-from utils.setting import Type, ClippingAlgorithm
-
 class Clipping:
-    @staticmethod
-    def clip(object_data, coordinates, viewing_window, clip_method):
-        object_type = object_data.tipo
-        if object_type == Type.POINT:
-            return Clipping.clip_point(coordinates, viewing_window)
-        elif object_type == Type.LINE:
-            if clip_method == ClippingAlgorithm.COHEN:
-                return Clipping.clip_line_cohen_sutherland(coordinates, viewing_window)
-            else:
-                return Clipping.clip_line_liang_barsky(coordinates, viewing_window)
-        elif object_type == Type.WIREFRAME:
-            return Clipping.clip_wireframe_sutherlandHodgeman(coordinates, viewing_window)
-
+    
     @staticmethod
     def clip_point(point_coords, window):
         x, y = point_coords[0]

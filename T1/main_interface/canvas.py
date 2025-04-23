@@ -1,8 +1,7 @@
 from PySide6.QtWidgets import QLabel
 from PySide6.QtGui import QPixmap, QPainter
 from PySide6.QtCore import Qt
-from utils.setting import Settings
-from utils.clipping import Clipping
+from utils.setting import Settings, Type
 
 class Canvas(QLabel):
     def __init__(self, parent, viewport):
@@ -27,26 +26,13 @@ class Canvas(QLabel):
         """
         self.__pix_map.fill(Qt.white)
         painter = QPainter(self.__pix_map)
-
-        # Normalizar as coordenadas dos objetos para a janela de mundo normalizada [-1, 1]
-        normalized_coords_list = self.__viewport.normalizeCoords(obj_list)
-
-        # Iterar sobre cada objeto para aplicar o clipping e desenhar na viewport
-        for idx, obj in enumerate(obj_list):
-            normalized_coords = normalized_coords_list[idx]
-            draw_clipped, clipped_coords = Clipping.clip(obj, normalized_coords, window, clipping_algorithm)
-            
-            if draw_clipped:
-                viewport_coords = []
-                for norm_coord in clipped_coords:
-                    x_vp = self.__viewport.calcularXviewport(norm_coord[0])
-                    y_vp = self.__viewport.calcularYviewport(norm_coord[1])
-                    viewport_coords.append((x_vp, y_vp))
-                obj.draw(viewport_coords, painter)
-
-        # Desenhar a borda da viewport
+        
+        for obj in obj_list:
+            if obj.tipo == Type.POINT or obj.tipo == Type.WIREFRAME:
+                obj.draw(window, painter, self.__viewport)
+            else:
+                obj.draw(window, painter, self.__viewport, clipping_algorithm)
+        
         self.__viewport.drawBorder(painter)
-
-        # Atualizar o QLabel para exibir o desenho
-        painter.end()
+        
         self.setPixmap(self.__pix_map)

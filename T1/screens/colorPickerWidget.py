@@ -1,11 +1,12 @@
 from PySide6.QtWidgets import QColorDialog, QPushButton, QHBoxLayout, QWidget
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 
 class ColorPickerWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, initial_color="#000000", parent=None):
         super().__init__(parent)
 
-        self.color = "#000000"  # Cor inicial (preto)
+        self.color = initial_color# Cor inicial (preto)
 
         # Layout horizontal para botão de cor e botão de seleção
         self.layout = QHBoxLayout(self)
@@ -35,3 +36,26 @@ class ColorPickerWidget(QWidget):
 
     def get_selected_color(self):
         return self.color  # Retorna a cor escolhida
+
+    def set_selected_color(self, color_value):
+        """Define a cor exibida no widget.
+
+        Args:
+            color_value (str or tuple or list or QColor): A cor a ser definida.
+                Pode ser uma string no formato HEX ('#RRGGBB'), uma tupla/lista RGB (inteiros de 0 a 255),
+                ou um objeto QColor.
+        """
+        if isinstance(color_value, str):
+            color = QColor(color_value)
+            if color.isValid():
+                self._color = color.name()
+                self.color_display.setStyleSheet(f"background-color: {self._color}; border-radius: 5px;")
+        elif isinstance(color_value, (tuple, list)) and len(color_value) == 3 and all(0 <= c <= 255 for c in color_value):
+            color = QColor(*color_value)
+            self._color = color.name()
+            self.color_display.setStyleSheet(f"background-color: {self._color}; border-radius: 5px;")
+        elif isinstance(color_value, QColor) and color.isValid():
+            self._color = color.name()
+            self.color_display.setStyleSheet(f"background-color: {self._color}; border-radius: 5px;")
+        else:
+            print(f"Aviso: Valor de cor inválido fornecido: {color_value}")

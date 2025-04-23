@@ -387,5 +387,5 @@ class MainWindow(QtWidgets.QMainWindow):
         display_file = self.__display_file
         log_message_func = self.__logs
         update_view_func = self.__updateViewframe
-        object_editor = ObjectEditor(object_list, display_file, log_message_func, update_view_func)
+        object_editor = ObjectEditor   (object_list, display_file, log_message_func, update_view_func)
         object_editor.edit_object()

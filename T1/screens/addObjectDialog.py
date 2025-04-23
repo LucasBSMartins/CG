@@ -3,8 +3,10 @@ from PySide6.QtWidgets import QLabel, QLineEdit
 from utils.wnr import Wnr
 from tools.addPoint import AddPoint
 from tools.addLine import AddLine
-from screens.colorPickerWidget import ColorPickerWidget
+from tools.addBezier import AddBezierCurve
 from tools.addWireframe import AddWireframe
+from screens.colorPickerWidget import ColorPickerWidget
+
 
 
 class AddObjectDialog(QtWidgets.QDialog):
@@ -57,6 +59,8 @@ class AddObjectDialog(QtWidgets.QDialog):
             self._create_line_inputs()
         elif self.selected_object == "Polígono":
             self._create_polygon_inputs()
+        elif self.selected_object == "Curva de Bézier":
+            self._create_bezier_inputs()
 
     def _create_point_inputs(self):
         """Creates input fields for a point (X, Y)."""
@@ -127,6 +131,41 @@ class AddObjectDialog(QtWidgets.QDialog):
 
         self.scroll_widget.setLayout(self.scroll_layout)  # Update the scroll widget layout
 
+    def _create_bezier_inputs(self):
+        """Creates input fields for a Bézier curve (dynamically generated control points)."""
+        self.scroll_layout.addWidget(QLabel("Número de pontos de controle (mínimo 4):"))
+        self.num_bezier_points_input = QtWidgets.QSpinBox(self)
+        self.num_bezier_points_input.setMinimum(4)
+        self.num_bezier_points_input.setValue(4)
+        self.num_bezier_points_input.valueChanged.connect(self._generate_bezier_point_inputs)
+        self.scroll_layout.addWidget(self.num_bezier_points_input)
+
+        self.bezier_points_container = QtWidgets.QVBoxLayout()
+        self.scroll_layout.addLayout(self.bezier_points_container)
+        self._generate_bezier_point_inputs()
+    
+    def _generate_bezier_point_inputs(self):
+        """Dynamically generates input fields for Bézier curve control points."""
+        self._clear_layout(self.bezier_points_container)
+
+        self.bezier_point_inputs = []
+        num_points = self.num_bezier_points_input.value()
+
+        for i in range(num_points):
+            label = QLabel(f"Ponto de controle {i + 1} (X, Y):")
+            x_input = self._create_coordinate_spinbox()
+            y_input = self._create_coordinate_spinbox()
+
+            x_input.setValue(0)
+            y_input.setValue(0)
+
+            self.bezier_points_container.addWidget(label)
+            self.bezier_points_container.addWidget(x_input)
+            self.bezier_points_container.addWidget(y_input)
+            self.bezier_point_inputs.append((x_input, y_input))
+
+        self.scroll_widget.setLayout(self.scroll_layout)
+
     def _create_coordinate_spinbox(self):
         """Creates a QDoubleSpinBox for coordinate input with consistent settings."""
 
@@ -182,6 +221,8 @@ class AddObjectDialog(QtWidgets.QDialog):
             self._add_line(object_name, selected_color)
         elif self.selected_object == "Polígono":
             self._add_polygon(object_name, selected_color)
+        elif self.selected_object == "Curva de Bézier":
+            self._add_bezier(object_name, selected_color)
 
         self.object_list.addItem(f"{object_name} ({self.selected_object})")  # Add to list widget
         self.accept()  # Close the dialog successfully
@@ -252,6 +293,25 @@ class AddObjectDialog(QtWidgets.QDialog):
         add_wireframe_tool = AddWireframe(num_points)
         wireframe = add_wireframe_tool.create(name, points, color)
         self.display_file.addObject(wireframe)
+
+    def _add_bezier(self, name, color):
+        """Adds a Bézier curve to the display file."""
+        points_str = [(x.text().strip(), y.text().strip()) for x, y in self.bezier_point_inputs]
+
+        if any(not x or not y for x, y in points_str):
+            Wnr.noPoints()
+            return
+
+        if any(not self._is_valid_number(x) or not self._is_valid_number(y) for x, y in points_str):
+            Wnr.invalidValor()
+            return
+
+        points = [(int(x), int(y)) for x, y in points_str]
+        n_curves = len(points) - 1
+        bezier_tool = AddBezierCurve(n_curves)
+
+        bezier_curve = bezier_tool.create(name, points, color)
+        self.display_file.addObject(bezier_curve)
 
     def _is_valid_number(self, value):
         """Checks if a string represents a valid integer."""

@@ -147,6 +147,7 @@ class Type(Enum):
     POINT = 1
     LINE = 2
     WIREFRAME = 3
+    BEZIER_CURVE = 4
 
 class RotationType(Enum):
     OBJECT_CENTER = "Centro do objeto"
