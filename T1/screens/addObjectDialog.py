@@ -5,12 +5,12 @@ from tools.addPoint import AddPoint
 from tools.addLine import AddLine
 from tools.addBezier import AddBezierCurve
 from tools.addWireframe import AddWireframe
+from tools.addBSpline import AddBSpline 
 from screens.colorPickerWidget import ColorPickerWidget
 
 
-
 class AddObjectDialog(QtWidgets.QDialog):
-    """Dialog for adding graphical objects (Point, Line, Polygon)."""
+    """Dialog for adding graphical objects (Point, Line, Polygon, Bézier, BSpline)."""
 
     def __init__(self, selected_object, display_file, object_list):
         super().__init__()
@@ -61,6 +61,8 @@ class AddObjectDialog(QtWidgets.QDialog):
             self._create_polygon_inputs()
         elif self.selected_object == "Curva de Bézier":
             self._create_bezier_inputs()
+        elif self.selected_object == "B-Spline":
+            self._create_bspline_inputs()
 
     def _create_point_inputs(self):
         """Creates input fields for a point (X, Y)."""
@@ -97,7 +99,7 @@ class AddObjectDialog(QtWidgets.QDialog):
     def _create_polygon_inputs(self):
         """Creates input fields for a polygon (dynamically generated points)."""
 
-        self.scroll_layout.addWidget(QLabel("Número de pontos:"))
+        self.scroll_layout.addWidget(QLabel("Número de pontos (mínimo 3):"))
         self.num_points_input = QtWidgets.QSpinBox(self)
         self.num_points_input.setMinimum(3)
         self.num_points_input.setValue(3)
@@ -143,7 +145,7 @@ class AddObjectDialog(QtWidgets.QDialog):
         self.bezier_points_container = QtWidgets.QVBoxLayout()
         self.scroll_layout.addLayout(self.bezier_points_container)
         self._generate_bezier_point_inputs()
-    
+
     def _generate_bezier_point_inputs(self):
         """Dynamically generates input fields for Bézier curve control points."""
         self._clear_layout(self.bezier_points_container)
@@ -163,6 +165,41 @@ class AddObjectDialog(QtWidgets.QDialog):
             self.bezier_points_container.addWidget(x_input)
             self.bezier_points_container.addWidget(y_input)
             self.bezier_point_inputs.append((x_input, y_input))
+
+        self.scroll_widget.setLayout(self.scroll_layout)
+
+    def _create_bspline_inputs(self):
+        """Creates input fields for a B-Spline curve (dynamically generated control points)."""
+        self.scroll_layout.addWidget(QLabel("Número de pontos de controle (mínimo 4):"))
+        self.num_bspline_points_input = QtWidgets.QSpinBox(self)
+        self.num_bspline_points_input.setMinimum(4)
+        self.num_bspline_points_input.setValue(4)
+        self.num_bspline_points_input.valueChanged.connect(self._generate_bspline_point_inputs)
+        self.scroll_layout.addWidget(self.num_bspline_points_input)
+
+        self.bspline_points_container = QtWidgets.QVBoxLayout()
+        self.scroll_layout.addLayout(self.bspline_points_container)
+        self._generate_bspline_point_inputs()
+
+    def _generate_bspline_point_inputs(self):
+        """Dynamically generates input fields for B-Spline curve control points."""
+        self._clear_layout(self.bspline_points_container)
+
+        self.bspline_point_inputs = []
+        num_points = self.num_bspline_points_input.value()
+
+        for i in range(num_points):
+            label = QLabel(f"Ponto de controle {i + 1} (X, Y):")
+            x_input = self._create_coordinate_spinbox()
+            y_input = self._create_coordinate_spinbox()
+
+            x_input.setValue(0)
+            y_input.setValue(0)
+
+            self.bspline_points_container.addWidget(label)
+            self.bspline_points_container.addWidget(x_input)
+            self.bspline_points_container.addWidget(y_input)
+            self.bspline_point_inputs.append((x_input, y_input))
 
         self.scroll_widget.setLayout(self.scroll_layout)
 
@@ -223,6 +260,8 @@ class AddObjectDialog(QtWidgets.QDialog):
             self._add_polygon(object_name, selected_color)
         elif self.selected_object == "Curva de Bézier":
             self._add_bezier(object_name, selected_color)
+        elif self.selected_object == "B-Spline":
+            self._add_bspline(object_name, selected_color)
 
         self.object_list.addItem(f"{object_name} ({self.selected_object})")  # Add to list widget
         self.accept()  # Close the dialog successfully
@@ -312,6 +351,25 @@ class AddObjectDialog(QtWidgets.QDialog):
 
         bezier_curve = bezier_tool.create(name, points, color)
         self.display_file.addObject(bezier_curve)
+
+    def _add_bspline(self, name, color):
+        """Adds a B-Spline curve to the display file."""
+        points_str = [(x.text().strip(), y.text().strip()) for x, y in self.bspline_point_inputs]
+
+        if any(not x or not y for x, y in points_str):
+            Wnr.noPoints()
+            return
+
+        if any(not self._is_valid_number(x) or not self._is_valid_number(y) for x, y in points_str):
+            Wnr.invalidValor()
+            return
+
+        points = [(int(x), int(y)) for x, y in points_str]
+        n_curves = len(points) - 1  # Number of curves for B-Spline.
+        bspline_tool = AddBSpline(n_curves)
+
+        bspline_curve = bspline_tool.create(name, points, color)
+        self.display_file.addObject(bspline_curve)
 
     def _is_valid_number(self, value):
         """Checks if a string represents a valid integer."""

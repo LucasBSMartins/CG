@@ -1,6 +1,6 @@
 from objects.object import Object
 from PySide6.QtGui import QPen, QColor
-from utils.setting import Type, ClippingAlgorithm
+from utils.setting import Type
 from utils.clipping import Clipping
 
 class Wireframe(Object):
