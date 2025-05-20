@@ -8,10 +8,7 @@ class Point(Object):
     def __init__(self, name, coord, color):
         super().__init__(name, Type.POINT, coord, color)
     
-    def draw(self, window, painter, viewport):
-        # Normalizar as coordenadas
-        normalized_coords = self.normalizeCoords(window)
-
+    def draw(self, window, painter, viewport, normalized_coords):
         # Determina se vai desenhar o ponto
         (draw, coords) = Clipping.clip_point(normalized_coords, window)
 

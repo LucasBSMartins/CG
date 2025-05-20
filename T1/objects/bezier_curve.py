@@ -8,8 +8,8 @@ class BerzierCurve(Object):
     def __init__(self, name, coord, color):
         super().__init__(name, Type.BEZIER_CURVE, coord, color)
 
-    def draw(self, window, painter, viewport, clipping_algorithm):
-        normalized_coords = self.normalizeCoords(window)
+    def draw(self, window, painter, viewport, clipping_algorithm, normalized_coords):
+
         points = self.__get_drawing_points(normalized_coords)
 
         for i in range(len(points) - 1):

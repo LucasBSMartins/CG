@@ -2,34 +2,48 @@ from objects.point import Point
 from objects.line import Line
 from objects.wireframe import Wireframe
 from PySide6.QtGui import QColor
-import os 
+import os
 
 class ReaderOBJ:
     def __init__(self):
         self.objects = []
 
     def openFile(self, name_file):
-        edges, graphics = self.__read_obj_file(name_file)
-        self.__create_graphics_elements(graphics, edges)
+        vertices, graphics = self.__read_obj_file(name_file)
+        self.__create_graphics_elements(graphics, vertices)
 
-    def __create_graphics_elements(self, graphics_elements, edges):
+    def __create_graphics_elements(self, graphics_elements, vertices):
         for name, data in graphics_elements.items():
-            obj_type, color, indices, *fill = data
-            element = None
-            points = self.__get_edges_from_indices(indices, edges)
-
-            if obj_type == "Ponto":
+            color = data["color"]
+            points = []
+            lines = [] # Lista para armazenar os pares de pontos que formam as arestas
+            for part in data["parts"]:
+                obj_type = part["type"]
+                indices = part["indices"]
+                # Get the vertex coordinates from the indices
+                for i in range(0, len(indices) - 1, 1): # Iterar sobre os índices para criar pares de pontos
+                    if indices[i] > 0 and indices[i] <= len(vertices) and indices[i+1] > 0 and indices[i+1] <= len(vertices):
+                        points.append(vertices[indices[i]-1])
+                        points.append(vertices[indices[i+1]-1])
+                        lines.append((vertices[indices[i]-1], vertices[indices[i+1]-1])) # Adiciona o par de pontos à lista de arestas
+                    else:
+                        print(f"Warning: Invalid vertex index in object {name}, skipping.")
+                element = None
+            if obj_type == "p":
                 element = Point(name.strip(), points, color)
-            elif obj_type == "Reta":
-                element = Line(name.strip(), points, color)
-            elif obj_type == "Wireframe":
+            elif obj_type == "l":
+                element = Line(name.strip(), points, color) # Passa a lista completa de pontos para a linha
+            elif obj_type == "f":
+                element = Wireframe(name.strip(), points, color) # Assuming Wireframe handles faces
+            elif obj_type == "OBJECT_3D":
                 element = Wireframe(name.strip(), points, color)
 
             if element:
                 self.objects.append(element)
 
     def __get_edges_from_indices(self, indices, edges):
-        return [(edges[i - 1][0], edges[i - 1][1]) for i in indices]
+        # Adicionado lógica para verificar se o tamanho da coordenada é 2, se for adiciona 0.0.
+        return [(edges[i - 1][0], edges[i - 1][1], 0.0) if len(edges[i-1]) == 2 else (edges[i - 1][0], edges[i-1][1], 0.0) if len(edges[i-1]) == 2  else edges[i - 1] for i in indices]
 
     def __read_mtl_file(self, name_file: str) -> dict:
         colors = {}
@@ -52,13 +66,11 @@ class ReaderOBJ:
         return colors
 
     def __read_obj_file(self, name_file: str) -> tuple:
-        edges = []
+        vertices = []
         graphics = {}
         colors = {}
-        name_obj = ""
-        type_obj = ""
-        color_obj = ""
-        points = []
+        current_object_name = None
+        color_obj = None  # Initialize color_obj here
 
         with open(name_file, "r") as file:
             for line in file:
@@ -73,24 +85,33 @@ class ReaderOBJ:
                 elif words[0] == "usemtl":
                     color_obj = colors.get(words[1])
                 elif words[0] == "v":
-                    edges.append(self.__read_tuple(words))
+                    # Na leitura dos vértices (elif words[0] == "v":), o código agora verifica o número de componentes.
+                    # Se houver 3 componentes, ele cria uma tupla (x, y, z).
+                    # Se houver 2 componentes, ele cria uma tupla (x, y, 0.0), efetivamente adicionando uma coordenada z de 0.
+                    if len(words) == 4:
+                        vertex_coords = tuple(float(w) for w in words[1:4])
+                    elif len(words) == 3:
+                        vertex_coords = tuple(float(w) for w in words[1:3]) + (0.0,)  # Adiciona z=0.0
+                    vertices.append(vertex_coords)
                 elif words[0] == "o":
-                    name_obj = words[1]
-                elif words[0] == "p":
-                    type_obj = "Ponto"
-                    points = [int(words[1])]
-                    graphics[name_obj] = [type_obj, color_obj, points]
-                elif words[0] == "l":
-                    type_obj = "Reta" if len(words) == 3 else "Wireframe"
-                    points = self.__read_list(words[1:])
-                    graphics[name_obj] = [type_obj, color_obj, points, False] if type_obj == "Wireframe" else [type_obj, color_obj, points]
-                elif words[0] == "f":
-                    type_obj = "Wireframe"
-                    points = self.__read_list(words[1:])
-                    graphics[name_obj] = [type_obj, color_obj, points, True]
-
-        return edges, graphics
-
+                    current_object_name = words[1]
+                    graphics[current_object_name] = {"color": color_obj, "parts": []} # Store color here
+                elif words[0] in ("p", "l", "f"):
+                    if current_object_name:
+                        try:
+                            indices = [int(w) for w in words[1:]]
+                            if current_object_name not in graphics:
+                                graphics[current_object_name] = {"color": color_obj, "parts": []}
+                            graphics[current_object_name]["parts"].append({
+                                "type": words[0],
+                                "indices": indices,
+                            })
+                        except ValueError:
+                            print(f"Warning: Invalid vertex index in OBJ file: {line.strip()}")
+                    else:
+                        print(f"Warning: Geometry type '{words[0]}' encountered before object name. Skipping.")
+        return vertices, graphics
+    
     def __read_tuple(self, words: list) -> tuple:
         return tuple(float(w) for w in words[1:4])
 

@@ -149,6 +149,7 @@ class Type(Enum):
     WIREFRAME = 3
     BEZIER_CURVE = 4
     B_SPLINE = 5
+    OBJECT_3D = 6
 
 class RotationType(Enum):
     OBJECT_CENTER = "Centro do objeto"
@@ -158,3 +159,9 @@ class RotationType(Enum):
 class ClippingAlgorithm(Enum):
     COHEN = "Método de Cohen Sutherland"
     LIANG = "Método de Liang-Barsky"
+
+class RotationAxis(Enum):
+    X = "X"
+    Y = "Y"
+    Z = "Z"
+    ARBRITRARY = "Arbitrário"

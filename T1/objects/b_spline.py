@@ -16,7 +16,7 @@ class BSpline(Object):
         """
         super().__init__(name, Type.B_SPLINE, control_points, color)
 
-    def draw(self, window, painter, viewport, clipping_method):
+    def draw(self, window, painter, viewport, clipping_method, normalized_coords):
         """
         Draws the BSpline curve on the given painter.
 
@@ -26,14 +26,12 @@ class BSpline(Object):
             viewport (Viewport): The viewport transformation.
             clipping_method (ClippingMethod): The clipping method to use.
         """
-        # Normalize the control point coordinates
-        normalized_control_points = self.normalizeCoords(window)
 
-        if len(normalized_control_points) < 4:
+        if len(normalized_coords) < 4:
             return  # Need at least 4 control points to draw a cubic B-Spline
 
         # Calculate the points along the B-Spline curve
-        curve_points = self.__calculate_curve_points(normalized_control_points)
+        curve_points = self.__calculate_curve_points(normalized_coords)
 
         # Draw lines between the calculated points to approximate the curve
         pen = QPen(QColor(self.color), 3)

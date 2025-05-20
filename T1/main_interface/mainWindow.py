@@ -9,6 +9,7 @@ from utils.logs import Logs
 from objects.line import Line
 from objects.point import Point
 from objects.wireframe import Wireframe 
+from objects.object3D import Object3D
 from main_interface.window import Window
 from main_interface.viewport import Viewport
 from main_interface.displayFile import DisplayFile
@@ -31,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.__painter()
 
-        #MoveMonitor.center_on_second_monitor(self)
+        # MoveMonitor.center_on_second_monitor(self)
 
     # Contrução de frames
     def __buildFrame(self, parent, x, y, w, h):
@@ -78,10 +79,16 @@ class MainWindow(QtWidgets.QMainWindow):
     def __createControlFrameRadioButton(self, text, algorithm, x, y, width, height):
         radio_button = QtWidgets.QRadioButton(text, self.__clipping_frame)
         radio_button.setGeometry(x, y, width, height)
-        radio_button.algorithm = algorithm  # Store the algorithm
+        radio_button.algorithm = algorithm
         radio_button.setStyleSheet("color: black;")
         return radio_button
-   
+    
+    def __createControlFrameMoveRotateRadioButton(self, text, x, y, width, height):
+        radio_button = QtWidgets.QRadioButton(text, self.__control_frame)
+        radio_button.setGeometry(x, y, width, height)
+        radio_button.setStyleSheet("color: black;")
+        return radio_button
+
     def  __painter(self):
         
         # ///////////////// Gerando delimitações de área //////////////////////
@@ -151,16 +158,13 @@ class MainWindow(QtWidgets.QMainWindow):
         menu = QtWidgets.QMenu("Options", self)
         import_action = QtGui.QAction("Import", self)
         export_action = QtGui.QAction("Export", self)
-        #center_action = QtGui.QAction("Center", self)
         menu.addAction(import_action)
         menu.addAction(export_action)
-        #menu.addAction(center_action)
 
         menu.setStyleSheet(Settings.menuStyleSheet())
 
         import_action.triggered.connect(self.__importFile)
         export_action.triggered.connect(self.__exportFile)
-        #center_action.triggered.connect(self.__window.center_and_reset_rotation() and self.__updateViewframe)
 
         menu_action = QtGui.QAction("Options", self)
         menu_action.setMenu(menu)
@@ -222,33 +226,48 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__add_button.setGeometry(0, 0, 90, 25) 
         self.__operations_button.setGeometry(100, 0, 90, 25)   
 
-        # Botões controle da Window
+        self.__move_rotate_group = QtWidgets.QButtonGroup(self.__control_frame)
+        self.__move_radio = self.__createControlFrameMoveRotateRadioButton("Movimentação", 5, 7, 120, 20)
+        self.__rotate_radio = self.__createControlFrameMoveRotateRadioButton("Rotação", 5, 25, 180, 20)
+
+        self.__move_rotate_group.addButton(self.__move_radio)
+        self.__move_rotate_group.addButton(self.__rotate_radio)
+
+        self.__move_radio.setChecked(True) # Default selection for move/rotate
+
+        self.__move_rotate_group.buttonClicked.connect(self.__changeMoveRotate)
 
         self.__scaleSpinBox = QtWidgets.QDoubleSpinBox(self.__control_frame)
-        self.__scaleSpinBox.setGeometry(10, 30, 80, 25)
+        self.__scaleSpinBox.setGeometry(10, 60, 80, 25)
         self.__scaleSpinBox.setRange(0.01, 99.99)
         self.__scaleSpinBox.setSingleStep(1)
         self.__scaleSpinBox.setSuffix("%")
         self.__scaleSpinBox.setValue(10.0)
         self.__scaleSpinBox.setStyleSheet("background-color: white")
 
-        self.__zoom_in_button = self.__createControlFrameButton("ZOOM +", lambda: self.__zoom("in"), "Zoom in")
-        self.__zoom_in_button.setGeometry(100, 15, 80, 25)
-        self.__zoom_out_button = self.__createControlFrameButton("ZOOM -", lambda: self.__zoom("out"), "Zoom out")
-        self.__zoom_out_button.setGeometry(100, 45, 80, 25)
+        self.__zoom_in_button = self.__createControlFrameButton("+", lambda: self.__zoom("in"), "Zoom in")
+        self.__zoom_in_button.setGeometry(100, 50, 40, 40)
+        self.__zoom_in_button.setStyleSheet("font-size: 15px;")
+        self.__zoom_out_button = self.__createControlFrameButton("-", lambda: self.__zoom("out"), "Zoom out")
+        self.__zoom_out_button.setGeometry(142, 50, 40, 40)
+        self.__zoom_out_button.setStyleSheet("font-size: 15px;")
 
-        self.__up_button = self.__createControlFrameButton("↑", lambda: self.__move_window("up"), "Mover window para cima")
+        self.__up_button = self.__createControlFrameButton("↑", lambda: self.__moveUp(), "Mover window para cima")
         self.__up_button.setGeometry(75, 100, 40, 40)
-        self.__down_button = self.__createControlFrameButton("↓", lambda: self.__move_window("down"), "Mover window para baixo" )
+        self.__down_button = self.__createControlFrameButton("↓", lambda: self.__moveDown(), "Mover window para baixo" )
         self.__down_button.setGeometry(75, 145, 40, 40)
-        self.__left_button = self.__createControlFrameButton("←", lambda: self.__move_window("left"), "Mover window para esquerda")
+        self.__left_button = self.__createControlFrameButton("←", lambda: self.__moveLeft(), "Mover window para esquerda")
         self.__left_button.setGeometry(30, 145, 40, 40)
-        self.__right_button = self.__createControlFrameButton("→", lambda: self.__move_window("right"), "Mover window para direita")
+        self.__right_button = self.__createControlFrameButton("→", lambda: self.__moveRight(), "Mover window para direita")
         self.__right_button.setGeometry(120, 145, 40, 40)
+        self.__back_button = self.__createControlFrameButton("▲", lambda: self.__moveBack(), "Mover window para trás")
+        self.__back_button.setGeometry(35, 105, 35, 35)
+        self.__front_button = self.__createControlFrameButton("▼", lambda: self.__moveFront(), "Mover window para frente")
+        self.__front_button.setGeometry(120, 105, 35, 35)
 
         # Campo para definir o ângulo de rotação
         self.__rotation_spinbox = QtWidgets.QDoubleSpinBox(self.__control_frame)
-        self.__rotation_spinbox.setGeometry(60, 210, 70, 35)
+        self.__rotation_spinbox.setGeometry(60, 200, 70, 35)
         self.__rotation_spinbox.setRange(-360.0, 360.0)
         self.__rotation_spinbox.setSingleStep(5.0)
         self.__rotation_spinbox.setSuffix("°")
@@ -256,17 +275,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__rotation_spinbox.setStyleSheet("background-color: white")
 
         # Botão de rotação anti-horária
-        self.__rotate_ccw_button = self.__createControlFrameButton("⟲", lambda: self.__rotate_window(-self.__rotation_spinbox.value()), "Rotacionar anti-horário")
-        self.__rotate_ccw_button.setGeometry(10, 210, 40, 35)
+        self.__rotate_ccw_button = self.__createControlFrameButton("⟲", lambda: self.__rotateLeft(self.__rotation_spinbox.value()), "Rotacionar anti-horário")
+        self.__rotate_ccw_button.setGeometry(10, 200, 40, 35)
 
         # Botão de rotação horária
-        self.__rotate_cw_button = self.__createControlFrameButton("⟳", lambda: self.__rotate_window(self.__rotation_spinbox.value()), "Rotacionar horário")
-        self.__rotate_cw_button.setGeometry(140, 210, 40, 35)
+        self.__rotate_cw_button = self.__createControlFrameButton("⟳", lambda: self.__rotateRight(self.__rotation_spinbox.value()), "Rotacionar horário")
+        self.__rotate_cw_button.setGeometry(140, 200, 40, 35)
         font = QtGui.QFont()
         font.setPointSize(15)
 
         self.__rotate_ccw_button.setFont(font)
         self.__rotate_cw_button.setFont(font)
+
+        #Criando exemplos
+        obj1 = Line("linha (Reta)", [(200, 0, 0), (400, 0, 0)], QtGui.QColor(0,0,0))
+        self.__display_file.addObject(obj1)
+        self.__object_list.addItem(f"linha (Reta)")
+        obj2 = Wireframe("wireframe (Polígono)", [(300, -200, 0), (-300, -200, 0), (0, 200, 0)], QtGui.QColor(255,0,0))
+        self.__display_file.addObject(obj2)
+        self.__object_list.addItem("wireframe (Polígono)")
+        obj3 = Object3D("cubo (Objeto 3D)", [(-800, -800, 0), (-800, -400, 0), (-800, -400, 0), (-400, -400, 0), (-400, -400, 0), (-400, -800, 0), (-400, -800, 0), (-800, -800, 0), (-800, -800, -400), (-800, -400, -400), (-800, -400, -400), (-400, -400, -400), (-400, -400, -400), (-400, -800, -400), (-400, -800, -400), (-800, -800, -400), (-800, -800, 0), (-800, -800, -400), (-800, -400, 0), (-800, -400, -400), (-400, -800, 0), (-400, -800, -400), (-400, -400, 0), (-400, -400, -400)], QtGui.QColor(0,255,0))
+        self.__display_file.addObject(obj3)
+        self.__object_list.addItem("cubo (Objeto 3D)")
+
         self.__updateViewframe()
 
         # ///////////////// ////////////////////// //////////////////////
@@ -275,9 +306,45 @@ class MainWindow(QtWidgets.QMainWindow):
     def __updateViewframe(self):
         self.__canvas.drawObjects(self.__display_file.objects_list, self.__clipping_algorithm, self.__window)
   
-    def __move_window(self, direction):
-        self.__window.move_direction(direction, self.__scaleSpinBox.value())
-        self.__logs.logWindowMovidaPara(direction, self.__scaleSpinBox.value())
+    def __moveLeft(self):
+        selected_radio = self.__move_rotate_group.checkedButton()
+        if selected_radio == self.__move_radio:
+            self.__window.moveLeft(self.__scaleSpinBox.value())
+        else:
+            self.__window.rotate_y_axis(-self.__rotation_spinbox.value())
+        self.__updateViewframe()
+    
+    def __moveRight(self):
+        selected_radio = self.__move_rotate_group.checkedButton()
+        if selected_radio == self.__move_radio:
+            self.__window.moveRight(self.__scaleSpinBox.value())
+        else:
+            self.__window.rotate_y_axis(self.__rotation_spinbox.value())
+        self.__updateViewframe()
+
+    def __moveUp(self):
+        selected_radio = self.__move_rotate_group.checkedButton()
+
+        if selected_radio == self.__move_radio:
+            self.__window.moveUp(self.__scaleSpinBox.value())
+        elif selected_radio == self.__rotate_radio:
+            self.__window.rotate_x_axis(self.__rotation_spinbox.value())
+        self.__updateViewframe()
+    
+    def __moveDown(self):
+        selected_radio = self.__move_rotate_group.checkedButton()
+        if selected_radio == self.__move_radio:
+            self.__window.moveDown(self.__scaleSpinBox.value())
+        else:
+            self.__window.rotate_x_axis(-self.__rotation_spinbox.value())
+        self.__updateViewframe()
+    
+    def __moveFront(self):
+        self.__window.moveFront(self.__scaleSpinBox.value())
+        self.__updateViewframe()
+
+    def __moveBack(self):
+        self.__window.moveBack(self.__scaleSpinBox.value())
         self.__updateViewframe()
 
     def __zoom(self, direction):
@@ -289,10 +356,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__logs.logZoomOut(self.__scaleSpinBox.value())
         self.__updateViewframe()
 
-    def __rotate_window(self, angle):
-        self.__window.rotate(angle)
-        self.__logs.logWindowRotation(angle)
-        self.__updateViewframe()
+    def __rotateLeft(self, angle):
+        self.__window.rotate_z_axis(-angle)
+        self.__updateViewframe() 
+
+    def __rotateRight(self, angle):
+        self.__window.rotate_z_axis(angle)
+        self.__updateViewframe() 
 
     def __update_clipping_algorithm(self, radio_button):
         self.__clipping_algorithm = radio_button.algorithm
@@ -349,7 +419,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         generator = GenerateOBJ(self.__display_file)
         generator.generateFileObj(filename[0])
-
+    
     def __importFile(self):
         file_dialog = QtWidgets.QFileDialog()
         filepath = file_dialog.getOpenFileName(caption="Open Image", filter="Wavefront files (*.obj)")
@@ -371,7 +441,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.__updateViewframe()
     
-    # Método para deletar um objeto selecionado
     def __deleteObject(self):
 
         index_selected_obj = self.__object_list.currentRow()      
@@ -387,5 +456,31 @@ class MainWindow(QtWidgets.QMainWindow):
         display_file = self.__display_file
         log_message_func = self.__logs
         update_view_func = self.__updateViewframe
-        object_editor = ObjectEditor   (object_list, display_file, log_message_func, update_view_func)
+        object_editor = ObjectEditor(object_list, display_file, log_message_func, update_view_func)
         object_editor.edit_object()
+
+    def __changeMoveRotate(self, button):
+        if button == self.__move_radio:
+            self.__back_button.setEnabled(True)
+            self.__front_button.setEnabled(True)
+
+            self.__back_button.show()
+            self.__front_button.show()
+
+            self.__left_button.setToolTip("Mover window para esquerda")
+            self.__right_button.setToolTip("Mover window para direita")
+            self.__up_button.setToolTip("Mover window para cima")
+            self.__down_button.setToolTip("Mover window para baixo")
+        else:
+            self.__back_button.setEnabled(False)
+            self.__front_button.setEnabled(False)
+            self.__rotate_ccw_button.setEnabled(True)
+
+            self.__back_button.hide()
+            self.__front_button.hide()
+            self.__rotate_ccw_button.show()
+
+            self.__left_button.setToolTip("Rotacionar para esquerda no eixo y")
+            self.__right_button.setToolTip("Rotacionar para direita no eixo y")
+            self.__up_button.setToolTip("Rotacionar para cima no eixo x")
+            self.__down_button.setToolTip("Rotacionar para baixo no eixo x")

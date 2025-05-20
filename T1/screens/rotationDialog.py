@@ -1,6 +1,5 @@
-from PySide6.QtWidgets import QLabel, QDoubleSpinBox, QGridLayout, QDialog, QPushButton, QComboBox
-from tools.objectTransformator import ObjectTransformator
-from utils.setting import Settings, RotationType
+from PySide6.QtWidgets import QLabel, QDoubleSpinBox, QGridLayout, QDialog, QComboBox, QSpinBox, QHBoxLayout, QPushButton
+from utils.setting import Settings, RotationAxis
 
 class RotationDialog(QDialog):
     def __init__(self, displayFile, objectList):
@@ -11,80 +10,94 @@ class RotationDialog(QDialog):
         self.resize(200, 150)
 
         self.layout = QGridLayout(self)
-
-        # Escolha do ponto de rotação
-        rotation_label = QLabel("Ponto de rotação:")
-        self.__rotation_type = QComboBox()
-        self.__rotation_type.addItems([
-            RotationType.OBJECT_CENTER.value,
-            RotationType.WORLD_CENTER.value,
-            RotationType.ARBITRARY_POINT.value
-        ])
-        self.__rotation_type.currentIndexChanged.connect(self.__rotationTypeChanged)
-        
-        # Input do ângulo de rotação
         angle_label = QLabel("Ângulo de rotação (graus):")
-        self.__angle_input = QDoubleSpinBox()
+        self.__angle_input = QSpinBox()
         self.__angle_input.setRange(-360, 360)
-        self.__angle_input.setSingleStep(0.1)
         self.__angle_input.setValue(0)
-        
-        # Labels e campos de entrada para ponto arbitrário
-        self.__rotation_dx_label = QLabel("Coordenada do ponto X:")
-        self.__rotation_dx_input = QDoubleSpinBox()
-        self.__rotation_dx_input.setRange(Settings.min_coord(), Settings.max_coord())
-        self.__rotation_dx_input.setDecimals(0)
+    
+        axis_label = QLabel("Eixo de rotação:")
+        self.__rotation_axis = QComboBox()
+        self.__rotation_axis.addItems([RotationAxis.X.value,
+                                        RotationAxis.Y.value,
+                                        RotationAxis.Z.value,
+                                        RotationAxis.ARBRITRARY.value])
+        self.__rotation_axis.currentIndexChanged.connect(self.__rotationAxisChanged)
 
-        self.__rotation_dy_label = QLabel("Coordenada do ponto Y:")
-        self.__rotation_dy_input = QDoubleSpinBox()
-        self.__rotation_dy_input.setRange(Settings.min_coord(), Settings.max_coord())
-        self.__rotation_dy_input.setDecimals(0)
-        
-        # Layout
-        self.layout.addWidget(rotation_label, 0, 0)
-        self.layout.addWidget(self.__rotation_type, 0, 1)
-        self.layout.addWidget(angle_label, 1, 0)
-        self.layout.addWidget(self.__angle_input, 1, 1)
-        self.layout.addWidget(self.__rotation_dx_label, 2, 0)
-        self.layout.addWidget(self.__rotation_dx_input, 2, 1)
-        self.layout.addWidget(self.__rotation_dy_label, 3, 0)
-        self.layout.addWidget(self.__rotation_dy_input, 3, 1)
-        
-        # Botão de avançar
+        self.__arbitrary_explanation = QLabel("O eixo arbitrário é o eixo entre o centro do objeto e o ponto:")
+        self.__arbitrary_explanation.setFixedHeight(20) 
+        self.__rotation_x_label = QLabel("x:")
+        self.__rotation_x_input = QDoubleSpinBox()
+        self.__rotation_x_input.setRange(Settings.min_coord(), Settings.max_coord())
+        self.__rotation_y_label = QLabel("y:")
+        self.__rotation_y_input = QDoubleSpinBox()
+        self.__rotation_y_input.setRange(Settings.min_coord(), Settings.max_coord())
+        self.__rotation_z_label = QLabel("z:")
+        self.__rotation_z_input = QDoubleSpinBox()
+        self.__rotation_z_input.setRange(Settings.min_coord(), Settings.max_coord())
+
+        self.__rotationAxisChanged()
+
+        self.layout.addWidget(angle_label, 0, 0)
+        self.layout.addWidget(self.__angle_input, 0, 1)
+        self.layout.addWidget(axis_label, 1, 0)
+        self.layout.addWidget(self.__rotation_axis, 1, 1)
+        self.layout.addWidget(self.__arbitrary_explanation, 2, 0, 1, 2)
+        coords_hbox = QHBoxLayout()
+        coords_hbox.addWidget(self.__rotation_x_label)
+        coords_hbox.addWidget(self.__rotation_x_input)
+        coords_hbox.addWidget(self.__rotation_y_label)
+        coords_hbox.addWidget(self.__rotation_y_input)
+        coords_hbox.addWidget(self.__rotation_z_label)
+        coords_hbox.addWidget(self.__rotation_z_input)
+        self.layout.addLayout(coords_hbox, 3, 0, 1, 2)  
+
         self.next_button = QPushButton("Avançar")
         self.next_button.clicked.connect(self.next_step)
         self.next_button.setAutoDefault(False)
         self.next_button.setDefault(False)
         self.layout.addWidget(self.next_button, 4, 1)
-        
-        self.__rotationTypeChanged()
-
-    def __rotationTypeChanged(self):
-        """Ativa ou desativa os campos de ponto arbitrário dependendo do tipo de rotação."""
-        is_arbitrary = self.__rotation_type.currentText() == RotationType.ARBITRARY_POINT.value
-        self.__rotation_dx_label.setVisible(is_arbitrary)
-        self.__rotation_dx_input.setVisible(is_arbitrary)
-        self.__rotation_dy_label.setVisible(is_arbitrary)
-        self.__rotation_dy_input.setVisible(is_arbitrary)
+    
+    def __rotationAxisChanged(self):
+        if self.__rotation_axis.currentText() == RotationAxis.ARBRITRARY.value:
+            self.__rotation_x_input.setEnabled(True)
+            self.__rotation_y_input.setEnabled(True)
+            self.__rotation_z_input.setEnabled(True)
+            self.__rotation_x_input.show()
+            self.__rotation_y_input.show()
+            self.__rotation_z_input.show()
+            self.__rotation_x_label.show()
+            self.__rotation_y_label.show()
+            self.__rotation_z_label.show()
+            self.__arbitrary_explanation.show()
+        else:
+            self.__rotation_x_input.setEnabled(False)
+            self.__rotation_y_input.setEnabled(False)
+            self.__rotation_z_input.setEnabled(False)
+            self.__rotation_x_input.hide()
+            self.__rotation_y_input.hide()
+            self.__rotation_z_input.hide()
+            self.__rotation_x_label.hide()
+            self.__rotation_y_label.hide()
+            self.__rotation_z_label.hide()
+            self.__arbitrary_explanation.hide()
 
     def next_step(self):
-        angle = self.__angle_input.value()
-        rotation_type = self.__rotation_type.currentText()
-
         self.__selected = self.__objectList.currentRow()
         selected_item = self.__objectList.item(self.__selected)
         selected_item_text = selected_item.text()
         object_name = selected_item_text.split(' (')[0]
         selected_object = self.__displayFile.get_object(object_name)
-        transformator = ObjectTransformator(selected_object)
-        
-        if rotation_type == RotationType.OBJECT_CENTER.value:
-            transformator.rotateObjectCenter(angle)
-        elif rotation_type == RotationType.WORLD_CENTER.value:
-            transformator.rotateWorldCenter(angle)
-        elif rotation_type == RotationType.ARBITRARY_POINT.value:
-            x = self.__rotation_dx_input.value()
-            y = self.__rotation_dy_input.value()
-            transformator.rotateArbitraryPoint(angle, (x, y))
+                    
+        rotation_axis = self.__rotation_axis.currentText()
+        theta = self.__angle_input.value()
 
+        if rotation_axis == RotationAxis.X.value:
+            selected_object.rotateXAxis(theta)
+        elif rotation_axis == RotationAxis.Y.value:
+            selected_object.rotateYAxis(theta)
+        elif rotation_axis == RotationAxis.Z.value:
+            selected_object.rotateZAxis(theta)
+        elif rotation_axis == RotationAxis.ARBRITRARY.value:
+            point = (self.__rotation_x_input.value(), self.__rotation_y_input.value(), self.__rotation_z_input.value())
+            selected_object.rotateArbitrary(theta, point)
         self.accept()

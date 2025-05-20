@@ -16,23 +16,20 @@ class Canvas(QLabel):
         self.setPixmap(self.__pix_map)
     
     def drawObjects(self, obj_list, clipping_algorithm, window):
-        """
-        Desenha os objetos na viewport após normalização e clipping.
-
-        Args:
-            obj_list: Uma lista de objetos a serem desenhados.
-            clipping_algorithm: O algoritmo de clipping a ser usado (da enum ClippingAlgorithm).
-            window: A instância da classe Window que define a janela de mundo.
-        """
         self.__pix_map.fill(Qt.white)
         painter = QPainter(self.__pix_map)
         
+        projection_matrix = window.getParallelProjectionMatrix()
+        normalize_matrix = window.windowNormalize()
+
         for obj in obj_list:
+            normalized = obj.projectAndNormalize(projection_matrix, normalize_matrix)
+
             if obj.tipo == Type.POINT or obj.tipo == Type.WIREFRAME:
-                obj.draw(window, painter, self.__viewport)
+                obj.draw(window, painter, self.__viewport, normalized)
             else:
-                obj.draw(window, painter, self.__viewport, clipping_algorithm)
-        
+                obj.draw(window, painter, self.__viewport, clipping_algorithm, normalized)
+
         self.__viewport.drawBorder(painter)
         
         self.setPixmap(self.__pix_map)

@@ -8,11 +8,8 @@ class Wireframe(Object):
     def __init__(self, name, coord, color):
         super().__init__(name, Type.WIREFRAME, coord, color)
 
-    def draw(self, window, painter, viewport):
-        # Normalizar as coordenadas
-        normalized_coords = self.normalizeCoords(window)
+    def draw(self, window, painter, viewport, normalized_coords):
 
-        # Determina se vai desenhar o wireframe/parte do wireframe
         (draw, coords) = Clipping.clip_wireframe_sutherlandHodgeman(normalized_coords, window)
 
         if draw:

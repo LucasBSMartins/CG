@@ -13,7 +13,7 @@ class ObjectSelectionDialog(QtWidgets.QDialog):
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.combo_box = QtWidgets.QComboBox(self)
-        self.combo_box.addItems(["Ponto", "Reta", "Polígono", "Curva de Bézier", "B-Spline"])
+        self.combo_box.addItems(["Ponto", "Reta", "Polígono", "Curva de Bézier", "B-Spline", "Objeto 3D"])
 
         self.layout.addWidget(QtWidgets.QLabel("Escolha o tipo de objeto:"))
         self.layout.addWidget(self.combo_box)

@@ -1,11 +1,12 @@
 # edit_object_dialog.py
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QLabel, QLineEdit, QDoubleSpinBox, QSpinBox
+from PySide6.QtWidgets import QLabel, QLineEdit
 from objects.point import Point
 from objects.line import Line
 from objects.wireframe import Wireframe
 from objects.bezier_curve import BerzierCurve
 from objects.b_spline import BSpline
+from objects.object3D import Object3D
 from utils.wnr import Wnr
 from screens.colorPickerWidget import ColorPickerWidget
 from utils.edit_object_inputs import EditObjectInputs, CoordinateSpinboxCreator
@@ -16,7 +17,7 @@ class EditObject(QtWidgets.QDialog):
     def __init__(self, selected_object, displayFile, objectList):
         super().__init__()
         self.setWindowTitle(f"Editar {selected_object.name}")
-        self.resize(300, 400)
+        self.resize(320, 400)
         self.__displayFile = displayFile
         self.__objectList = objectList
         self.selected_object = selected_object
@@ -62,6 +63,8 @@ class EditObject(QtWidgets.QDialog):
             self.inputs_handler._create_bezier_inputs(self.object_to_edit)
         elif isinstance(self.selected_object, BSpline):
             self.inputs_handler._create_bspline_inputs(self.object_to_edit)
+        elif isinstance(self.selected_object, Object3D):
+            self.inputs_handler._create_object3d_inputs(self.object_to_edit)
         self.scroll_widget.setLayout(self._scroll_layout)
 
     def _create_color_picker(self):
@@ -103,8 +106,8 @@ class EditObject(QtWidgets.QDialog):
             if coords:
                 self.object_to_edit.coord = coords
                 self.object_type = " (Polígono)"
-        elif isinstance(self.selected_object, BerzierCurve): # Fixed typo
-            coords = self.inputs_handler.get_bezier_coordinates() # Fixed typo
+        elif isinstance(self.selected_object, BerzierCurve):
+            coords = self.inputs_handler.get_bezier_coordinates()
             if coords:
                 self.object_to_edit.coord = coords
                 self.object_type = " (Curva de Bézier)"
@@ -113,6 +116,11 @@ class EditObject(QtWidgets.QDialog):
             if coords:
                 self.object_to_edit.coord = coords
                 self.object_type = " (B-Spline)"
+        elif isinstance(self.selected_object, Object3D):
+            coords = self.inputs_handler.get_object3d_coordinates()
+            if coords:
+                self.object_to_edit.coord = coords
+                self.object_type = " (Objeto 3D)"
 
         if hasattr(self, 'object_type'):
             self.object_to_edit.name = str(nome)
@@ -152,6 +160,10 @@ class EditObject(QtWidgets.QDialog):
     @property
     def control_points_container(self):
         return self._get_control_points_container()
+    
+    @points_container.setter
+    def points_container(self, value):
+        self._points_container = value
 
     def _get_control_points_container(self):
         if not hasattr(self, '_control_points_container'):

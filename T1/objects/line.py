@@ -8,11 +8,8 @@ class Line(Object):
     def __init__(self, name, coord, color):
         super().__init__(name, Type.LINE, coord, color)
     
-    def draw(self, window, painter, viewport, clipping_algorithm):
-        # Normalizar as coordenadas
-        normalized_coords = self.normalizeCoords(window)
+    def draw(self, window, painter, viewport, clipping_algorithm, normalized_coords):
 
-        # Determina se vai desenhar a linha/parte da linha
         if clipping_algorithm ==  ClippingAlgorithm.COHEN:
             (draw, coords) = Clipping.clip_line_cohen_sutherland(normalized_coords, window)
         else:
