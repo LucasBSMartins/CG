@@ -102,13 +102,32 @@ class Window:
         result = np.matmul(np.matmul(translating_vpr, rotating_x), rotating_y)
         return result
     
+    # Prompt(s) empregado(s):
+    #   - "Implemente o método `getPerspectiveProjectionMatrix` para uma classe que
+    #     simula uma câmera ou janela de visualização. A função deve calcular a
+    #     matriz de projeção em perspectiva.
+    #     Deve considerar:
+    #     - `self.__center` para a translação do VPR (View Plane Reference).
+    #     - `self.__x_angle` e `self.__y_angle` para as rotações em X e Y.
+    #     - Um fator de distância `d` (definido como 800) para a matriz de perspectiva.
+    #     A função deve utilizar `MatrixGenerator.generateTranslationMatrix3D`,
+    #     `MatrixGenerator.generateRotationMatrix3D_X`,
+    #     `MatrixGenerator.generateRotationMatrix3D_Y` e `np.matmul` para combinar as matrizes
+    #     na ordem correta: translação, rotação X, rotação Y e matriz de perspectiva."
     def getPerspectiveProjectionMatrix(self):
         vpr = self.__center
+        
+        # Gera a matriz de translação para mover o VPR para a origem
         translating_vpr = MatrixGenerator.generateTranslationMatrix3D(-vpr[0], -vpr[1], -vpr[2])
+        
+        # Gera as matrizes de rotação para alinhar o VPR com os eixos globais
         rotating_x = MatrixGenerator.generateRotationMatrix3D_X(-self.__x_angle)
         rotating_y = MatrixGenerator.generateRotationMatrix3D_Y(-self.__y_angle)
 
+        # Fator de distância para a projeção em perspectiva (pode ser ajustado)
         d = 800
+
+        # Matriz de projeção em perspectiva
         perspective_matrix = np.transpose(np.array([
             [1, 0, 0, 0],
             [0, 1, 0, 0],
@@ -116,6 +135,8 @@ class Window:
             [0, 0, 1/d, 0]
         ]))
 
+        # Combina as matrizes na ordem correta: translação -> rotação X -> rotação Y -> perspectiva
+        # A ordem das multiplicações de matrizes é crucial para o resultado final da projeção.
         result = np.matmul(np.matmul(np.matmul(translating_vpr, rotating_x), rotating_y), perspective_matrix)
         return result
 

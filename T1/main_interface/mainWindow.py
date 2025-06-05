@@ -32,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.__painter()
 
-        MoveMonitor.center_on_second_monitor(self)
+        #MoveMonitor.center_on_second_monitor(self)
 
     # Contrução de frames
     def __buildFrame(self, parent, x, y, w, h):
@@ -225,7 +225,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__clipping_algorithm = ClippingAlgorithm.COHEN  # Initialize the algorithm
 
         self.__clipping_group.buttonClicked.connect(self.__update_clipping_algorithm)
-
+        
+        # Prompt(s) empregado(s):
+        #   - "Crie um grupo de botões (QButtonGroup) para gerenciar dois QRadioButtons:
+        #     um para projeção paralela ('PARALLEL') e outro para projeção em perspectiva
+        #     ('PERSPECTIVE'). Configure a geometria, o estado inicial (paralela marcada),
+        #     e o estilo de cor para preto para ambos. Conecte o sinal 'toggled' de cada
+        #     botão ao método `__changeProjection` da classe."
+        #
+        # Dicionário de Dados da Interface (Variáveis de Instância configuradas):
+        #   - self.__parallel_button (QtWidgets.QRadioButton): Botão de rádio para projeção paralela.
+        #   - self.__perspective_button (QtWidgets.QRadioButton): Botão de rádio para projeção em perspectiva.
+        #   - self.__projection (Projection enum): Armazena o tipo de projeção selecionado.
+        
         # Botões de projeção paralela x projeção em perspectiva
         projection_buttons = QtWidgets.QButtonGroup()
         self.__parallel_button = QtWidgets.QRadioButton(Projection.PARALLEL.value, self.__projection_frame)

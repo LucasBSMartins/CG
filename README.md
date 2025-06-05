@@ -38,3 +38,8 @@ Para sair do ambiente virtual, execute:
 
 ```
 deactivate
+```
+
+##  Documentação da Utilização da IAGen 
+Modelo utilizado: Gemini-2.0-Flash
+URL da implementação do modelo: https://gemini.google.com/

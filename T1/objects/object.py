@@ -15,6 +15,13 @@ class Object(ABC):
     def draw(self, transformed_coord, painter):
         pass
     
+    # Prompt(s) empregado(s):
+    #   - "Implemente a parte do método `projectAndNormalize` que lida com a projeção
+    #     paralela e perspectiva. Para projeção paralela, multiplique as coordenadas
+    #     do objeto pela matriz de projeção e use as duas primeiras coordenadas.
+    #     Para projeção em perspectiva, multiplique as coordenadas pela matriz de projeção,
+    #     divida x e y pelo componente 'w', e descarte o ponto se z <= 0 após a transformação.
+    #     Adicione o resultado a `project_coords`."
     def projectAndNormalize(self, project, normalize, projection_type):
         project_coords = []
         if projection_type == Projection.PARALLEL:
