@@ -165,3 +165,7 @@ class RotationAxis(Enum):
     Y = "Y"
     Z = "Z"
     ARBRITRARY = "Arbitrário"
+
+class Projection(Enum):
+    PARALLEL = "Projeção Paralela"
+    PERSPECTIVE = "Projeção em Perspectiva"

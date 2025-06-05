@@ -2,10 +2,9 @@ from abc import ABC, abstractmethod
 import numpy as np
 from tools.matrixGenerator import MatrixGenerator
 from math import sqrt
+from utils.setting import Projection
 
 class Object(ABC):
-    # Classe abstrata de objeto, que será estendida no código 
-    # para representação dos três tipos de objeto
     def __init__(self, name, tipo, coord, color="#000000"):
         self.__name = name
         self.__tipo = tipo
@@ -16,12 +15,19 @@ class Object(ABC):
     def draw(self, transformed_coord, painter):
         pass
     
-    # Projeta e normaliza as coordenadas do objeto
-    def projectAndNormalize(self, project, normalize):
+    def projectAndNormalize(self, project, normalize, projection_type):
         project_coords = []
-        for x, y, z in self.coord:
-            transformed_coord = (np.dot(np.array([x, y, z, 1]), np.array(project))).tolist()
-            project_coords.append(transformed_coord[:2])
+        if projection_type == Projection.PARALLEL:
+            for x, y, z in self.coord:
+                transformed_coord = (np.dot(np.array([x, y, z, 1]), np.array(project))).tolist()
+                project_coords.append(transformed_coord[:2])
+        else:
+            for x, y, z in self.coord:
+                transformed_coord = (np.dot(np.array([x, y, z, 1]), np.array(project))).tolist()
+                w = transformed_coord[3] if transformed_coord[3] != 0 else 1
+                project_coords.append([transformed_coord[0] / w, transformed_coord[1] / w])
+                if transformed_coord[2] <= 0:
+                    return []
         normalize_coords = []
         for x, y in project_coords:
             transformed_coord = (np.dot(np.array([x, y, 1]), np.array(normalize))).tolist()

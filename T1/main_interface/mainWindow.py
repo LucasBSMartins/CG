@@ -13,7 +13,7 @@ from objects.object3D import Object3D
 from main_interface.window import Window
 from main_interface.viewport import Viewport
 from main_interface.displayFile import DisplayFile
-from utils.setting import Settings, ClippingAlgorithm
+from utils.setting import Settings, ClippingAlgorithm, Projection
 from utils.moveToSecondMonitor import MoveMonitor
 from main_interface.canvas import Canvas
 from screens.transformObjectDialog import TransformObjectDialog
@@ -32,13 +32,18 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.__painter()
 
-        # MoveMonitor.center_on_second_monitor(self)
+        MoveMonitor.center_on_second_monitor(self)
 
     # Contrução de frames
     def __buildFrame(self, parent, x, y, w, h):
         frame = QtWidgets.QFrame(parent)
         frame.setGeometry(x, y, w, h)
         frame.setStyleSheet("QFrame { border: 2px solid black; }")
+        return frame
+
+    def __buildFrameBorderless(self, parent, x, y, w, h):
+        frame = QtWidgets.QFrame(parent)
+        frame.setGeometry(x, y, w, h)
         return frame
 
     # Método para criar e configurar um texto (QLabel) dentro de um frame
@@ -99,7 +104,9 @@ class MainWindow(QtWidgets.QMainWindow):
                                          Settings.menu_frame()[2],
                                          Settings.menu_frame()[3])
         
-        self.__console_frame = self.__buildFrame(self, 250, 500, 530, 90)
+        self.__console_frame = self.__buildFrame(self, 250, 520, 530, 70)
+
+        self.__projection_frame = self.__buildFrameBorderless(self, 250, 492, 530, 26)
         
         self.__view_frame = self.__buildFrame(self, Settings.view_frame()[0],
                                          Settings.view_frame()[1],
@@ -136,7 +143,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__console = QtWidgets.QTextEdit(self.__console_frame)
         self.__console.setReadOnly(True)
         self.__console.setStyleSheet("color: black; background-color: white; border: 1px solid black;")
-        self.__console.setGeometry(5, 5, 520, 80)
+        self.__console.setGeometry(5, 5, 520, 60)
 
         #Criando viewport
         self.__viewport = Viewport(self.__window)
@@ -219,6 +226,21 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.__clipping_group.buttonClicked.connect(self.__update_clipping_algorithm)
 
+        # Botões de projeção paralela x projeção em perspectiva
+        projection_buttons = QtWidgets.QButtonGroup()
+        self.__parallel_button = QtWidgets.QRadioButton(Projection.PARALLEL.value, self.__projection_frame)
+        self.__parallel_button.setGeometry(0, 2, 120, 20)
+        self.__parallel_button.setChecked(True)
+        self.__projection = Projection.PARALLEL
+        self.__parallel_button.setStyleSheet("color: black;")
+        self.__parallel_button.toggled.connect(self.__changeProjection)
+        self.__perspective_button = QtWidgets.QRadioButton(Projection.PERSPECTIVE.value, self.__projection_frame)
+        self.__perspective_button.setGeometry(125, 2, 160, 20)
+        projection_buttons.addButton(self.__parallel_button)
+        projection_buttons.addButton(self.__perspective_button)
+        self.__perspective_button.toggled.connect(self.__changeProjection)
+        self.__perspective_button.setStyleSheet("color: black;")
+
         # Botões objetos
         self.__add_button = self.__createObjectFrameButton('ADICIONAR', lambda: self.__add_object())
         self.__operations_button = self.__createObjectFrameButton('OPERAÇÕES', self.__choose_operation)
@@ -288,15 +310,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__rotate_cw_button.setFont(font)
 
         #Criando exemplos
-        obj1 = Line("linha (Reta)", [(200, 0, 0), (400, 0, 0)], QtGui.QColor(0,0,0))
+        obj1 = Line("linha1", [(200, 0, 800), (400, 0, 800)], QtGui.QColor(0,0,0))
         self.__display_file.addObject(obj1)
-        self.__object_list.addItem(f"linha (Reta)")
-        obj2 = Wireframe("wireframe (Polígono)", [(300, -200, 0), (-300, -200, 0), (0, 200, 0)], QtGui.QColor(255,0,0))
+        self.__object_list.addItem(str(obj1.name))
+        obj2 = Wireframe("wireframe1", [(300, -200, 800), (-300, -200, 800), (0, 200, 800)], QtGui.QColor(255,0,0))
         self.__display_file.addObject(obj2)
-        self.__object_list.addItem("wireframe (Polígono)")
-        obj3 = Object3D("cubo (Objeto 3D)", [(-800, -800, 0), (-800, -400, 0), (-800, -400, 0), (-400, -400, 0), (-400, -400, 0), (-400, -800, 0), (-400, -800, 0), (-800, -800, 0), (-800, -800, -400), (-800, -400, -400), (-800, -400, -400), (-400, -400, -400), (-400, -400, -400), (-400, -800, -400), (-400, -800, -400), (-800, -800, -400), (-800, -800, 0), (-800, -800, -400), (-800, -400, 0), (-800, -400, -400), (-400, -800, 0), (-400, -800, -400), (-400, -400, 0), (-400, -400, -400)], QtGui.QColor(0,255,0))
+        self.__object_list.addItem(str(obj2.name))
+        obj3 = Object3D("cubo", [(-800, -800, 400), (-800, -400, 400), (-800, -400, 400), (-400, -400, 400), (-400, -400, 400), (-400, -800, 400), (-400, -800, 400), (-800, -800, 400), (-800, -800, 800), (-800, -400, 800), (-800, -400, 800), (-400, -400, 800), (-400, -400, 800), (-400, -800, 800), (-400, -800, 800), (-800, -800, 800), (-800, -800, 400), (-800, -800, 800), (-800, -400, 400), (-800, -400, 800), (-400, -800, 400), (-400, -800, 800), (-400, -400, 400), (-400, -400, 800)], QtGui.QColor(0,255,0))
         self.__display_file.addObject(obj3)
-        self.__object_list.addItem("cubo (Objeto 3D)")
+        self.__object_list.addItem(str(obj3.name))
 
         self.__updateViewframe()
 
@@ -304,7 +326,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Método para atualizar a exibição da janela
     def __updateViewframe(self):
-        self.__canvas.drawObjects(self.__display_file.objects_list, self.__clipping_algorithm, self.__window)
+        self.__canvas.drawObjects(self.__display_file.objects_list, self.__clipping_algorithm, self.__window, self.__projection)
   
     def __moveLeft(self):
         selected_radio = self.__move_rotate_group.checkedButton()
@@ -484,3 +506,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__right_button.setToolTip("Rotacionar para direita no eixo y")
             self.__up_button.setToolTip("Rotacionar para cima no eixo x")
             self.__down_button.setToolTip("Rotacionar para baixo no eixo x")
+        
+    def __changeProjection(self):
+        if self.__parallel_button.isChecked():
+            self.__projection = Projection.PARALLEL
+        else:
+            self.__projection = Projection.PERSPECTIVE
+        self.__updateViewframe()
